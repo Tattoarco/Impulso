@@ -1,0 +1,15 @@
+# Dependencias (muy pesadas para subir)
+node_modules/
+**/node_modules/
+
+# Variables de entorno y credenciales (seguridad)
+.env
+*.local
+
+# Archivos del sistema y del editor
+.DS_Store
+.vscode/
+
+# Carpetas de construcción/compilación
+dist/
+build/
