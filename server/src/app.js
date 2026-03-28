@@ -12,9 +12,9 @@ app.use(cors({
 app.use(express.json());
 
 // ── Rutas (se irán agregando módulo a módulo) ────────
-// app.use('/api/auth',        require('./modules/auth/auth.routes'));
-// app.use('/api/jobs',        require('./modules/jobs/jobs.routes'));
-// app.use('/api/submissions', require('./modules/submissions/submissions.routes'));
+app.use('/api/auth',        require('./modules/auth/auth.routes'));
+app.use('/api/jobs',        require('./modules/jobs/jobs.routes'));
+app.use('/api/submissions', require('./modules/submissions/submissions.routes'));
 
 // ── Ruta de prueba ───────────────────────────────────
 app.get('/api/health', (req, res) => {
