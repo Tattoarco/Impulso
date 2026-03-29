@@ -1,9 +1,10 @@
-import Sidebar from '../Components/Sidebar'; 
+// import Sidebar from "../Components/Sidebar";
+// import Footer from "../Components/Footer";
 
 export default function Home() {
   return (
     <>
-      <Sidebar />
+      <h1>Holaaa</h1>
     </>
   );
 }
