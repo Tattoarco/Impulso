@@ -5,6 +5,7 @@ import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Candidato from "./Pages/Candidato";
 import Empresa from "./Pages/Empresa";
+import CrearProyecto from "./Pages/CrearProyecto";
 
 function App() {
   return (
@@ -29,7 +30,12 @@ function App() {
           </PrivateRoute>
         }
       />
-
+      <Route 
+        path="/crear-proyecto" 
+        element={
+      <CrearProyecto />
+        }
+ />
       
     </Routes>
   );
