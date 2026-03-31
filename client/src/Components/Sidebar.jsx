@@ -49,14 +49,14 @@ export default function Sidebar() {
               </div>
             )}
 
-            <button onClick={() => setOpen(!open)} className="text-gray-500 text-lg">
+            <button onClick={() => setOpen(!open)} className="text-orange-500 text-xl cursor-pointer">
               {open ? "←" : "→"}
             </button>
           </div>
           {/* MENU */}
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             <Item icon="fi fi-rr-home" text="Dashboard" open={open} />
-            <Item icon="fi fi-rr-briefcase" text="Mis proyectos" active open={open} />
+            <Item icon="fi fi-rr-briefcase" text="Mis proyectos" active open={open}  />
             <Item icon="fi fi-rr-calendar" text="Calendario" open={open} />
             <Item icon="fi fi-rr-envelope" text="Mensajes" open={open} />
             <Item icon="fi fi-rr-bell" text="Notificaciones" open={open} />
@@ -79,12 +79,12 @@ export default function Sidebar() {
         {/* FOOTER */}
         <div>
           {open ? (
-            <Button onClick={() => navigate(current.route)} className="w-full bg-blue-500 text-white rounded-2xl py-3 flex items-center justify-center gap-2 shadow-md">
+            <Button onClick={() => navigate(current.route)} className="w-full bg-orange-500 text-white rounded-2xl py-3 flex items-center justify-center gap-2 shadow-md">
               <span className="text-lg">+</span>
               {current.label}
             </Button>
           ) : (
-            <Button onClick={() => navigate(current.route)} className="w-full bg-blue-500 text-white rounded-xl py-3 flex justify-center">
+            <Button onClick={() => navigate(current.route)} className="w-full bg-orange-500 text-white rounded-xl py-3 flex justify-center">
               +
             </Button>
           )}
