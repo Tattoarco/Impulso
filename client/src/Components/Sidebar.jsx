@@ -14,6 +14,22 @@ export default function Sidebar() {
     candidato: "Candidato",
   };
 
+  const configByRole = {
+    empresa: {
+      label: "Crear proyecto",
+      route: "/crear-proyecto",
+    },
+    candidato: {
+      label: "Explorar proyectos",
+      route: "/proyectos",
+    },
+  };
+
+  const current = configByRole[user?.role] || {
+    label: "Acción",
+    route: "/",
+  };
+
   return (
     <div
       className={`fixed top-6 left-6 h-[92vh] z-50 transition-all duration-300 
@@ -62,15 +78,13 @@ export default function Sidebar() {
 
         {/* FOOTER */}
         <div>
-          {open && (
-            <Button className="w-full bg-blue-500 text-white rounded-2xl py-3 flex items-center justify-center gap-2 shadow-md">
+          {open ? (
+            <Button onClick={() => navigate(current.route)} className="w-full bg-blue-500 text-white rounded-2xl py-3 flex items-center justify-center gap-2 shadow-md">
               <span className="text-lg">+</span>
-              Crear tarea
+              {current.label}
             </Button>
-          )}
-
-          {!open && (
-            <Button onClick={() => navigate("/crear-proyecto")} className="w-full bg-blue-500 text-white rounded-xl py-3 flex justify-center">
+          ) : (
+            <Button onClick={() => navigate(current.route)} className="w-full bg-blue-500 text-white rounded-xl py-3 flex justify-center">
               +
             </Button>
           )}
