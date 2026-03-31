@@ -38,7 +38,7 @@ export default function Login() {
       //  redirección por rol
       if (data.user.role === "candidato") {
         navigate("/candidato");
-      } else {
+      } else if (data.user.role === "empresa") {
         navigate("/empresa");
       }
     } catch (err) {
