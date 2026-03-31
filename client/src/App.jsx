@@ -5,12 +5,14 @@ import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Candidato from "./Pages/Candidato";
 import Empresa from "./Pages/Empresa";
+import CrearProyecto from "./Pages/CrearPoryecto";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/crear-proyecto" element={<CrearProyecto />} />
 
       {/* Rutas privadas */}
       <Route
