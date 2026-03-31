@@ -19,7 +19,6 @@ pool.connect()
   })
   .catch(err => {
     console.warn('PostgreSQL no disponible aún:', err.message);
-    console.warn('El servidor sigue funcionando. Crea la BD cuando estés listo.');
   });
 
 module.exports = pool;
