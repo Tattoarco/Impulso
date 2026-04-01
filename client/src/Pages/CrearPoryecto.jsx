@@ -431,7 +431,7 @@ export default function CrearProyecto() {
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5
                       ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}
                     >
-                      {m.role === "ai" ? "🤖" : "👤"}
+                      {m.role === "ai" ? "🤖" : "😎"}
                     </div>
                     <div
                       className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed

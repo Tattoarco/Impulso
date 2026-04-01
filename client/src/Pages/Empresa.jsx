@@ -8,7 +8,7 @@ export default function Empresa() {
     <>
       <SideBar />
 
-      <main className="ml-80 p-8 bg-gray-100 min-h-screen">
+      <main className="ml-24 p-8 bg-gray-100 min-h-screen">
         {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold">
