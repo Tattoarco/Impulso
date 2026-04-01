@@ -6,14 +6,16 @@ import Login from "./Pages/Login";
 import Candidato from "./Pages/Candidato";
 import Empresa from "./Pages/Empresa";
 import CrearProyecto from "./Pages/CrearProyecto";
+import Timeline from "./Pages/Timeline";
 
 function App() {
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/crear-proyecto" element={<CrearProyecto />} />
 
+      
       {/* Rutas privadas */}
       <Route
         path="/candidato"
@@ -31,13 +33,10 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route 
-        path="/crear-proyecto" 
-        element={
-      <CrearProyecto />
-        }
- />
-      
+
+      {/* Rutas por rol */}
+      <Route path="/empresa/crear-proyecto" element={<CrearProyecto />} />
+      <Route path="/empresa/timeline" element={<Timeline />} />
     </Routes>
   );
 }

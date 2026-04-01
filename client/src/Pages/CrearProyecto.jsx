@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Footer from "../Components/Footer";
 
 /* ─── Icons ─── */
 const CheckIcon = () => (
@@ -611,6 +612,7 @@ export default function CrearProyecto() {
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
+      <Footer />
     </div>
   );
 }

@@ -17,11 +17,11 @@ export default function Sidebar() {
   const configByRole = {
     empresa: {
       label: "Crear proyecto",
-      route: "/crear-proyecto",
+      route: "/empresa/crear-proyecto",
     },
     candidato: {
       label: "Explorar proyectos",
-      route: "/proyectos",
+      route: "/candidato/proyectos",
     },
   };
 
@@ -32,7 +32,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`fixed top-6 left-6 h-[92vh] z-50 transition-all duration-300 
+      className={`fixed top-6 left-6 h-[92vh] z-10 transition-all duration-300 
       ${open ? "w-72" : "w-20"}`}
     >
       <div className="h-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl flex flex-col justify-between p-4">

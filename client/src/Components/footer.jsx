@@ -1,3 +1,5 @@
+import { YearPickerContext } from "@heroui/react";
+
 export default function Footer() {
   return (
     <>
@@ -9,7 +11,12 @@ export default function Footer() {
           <span className="font-bold">Impulso</span>
         </div>
 
-        <p className="text-sm text-gray-400">© 2025 Impulso · Medellín, Colombia</p>
+        <div className="flex-col justify-items-end">
+          <p className="text-sm text-gray-400">© {new Date().getFullYear()} Impulso · Medellín, Colombia</p>
+          <p className="text-sm text-gray-400">
+            {new Date().getHours()}:{new Date().getMinutes()}
+          </p>
+        </div>
       </footer>
     </>
   );
