@@ -13,6 +13,7 @@ app.use(express.json());
 
 // ── Rutas (se irán agregando módulo a módulo) ────────
 app.use('/api/auth',        require('./modules/auth/auth.routes'));
+app.use('/api/ai', require('./Routes/ai'));
 // app.use('/api/jobs',        require('./modules/jobs/jobs.routes'));
 // app.use('/api/submissions', require('./modules/submissions/submissions.routes'));
 
@@ -38,3 +39,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor IMPULSO corriendo en http://localhost:${PORT}`);
 });
+
