@@ -9,6 +9,7 @@ router.post("/login", login);
 
 // Rutas privadas (requieren token)
 router.get("/empresa", verifyToken, soloEmpresa, getMe);
+router.get("/empresa/crear-proyecto", verifyToken, soloEmpresa, getMe);
 router.get("/candidato", verifyToken, soloCandidato, getMe);
 
 module.exports = router;

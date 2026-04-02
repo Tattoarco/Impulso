@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@heroui/react";
 import Footer from "../Components/Footer";
 
 /* ─── Icons ─── */
@@ -69,9 +70,40 @@ Estructura exacta:
 
 Responde SOLO con el JSON.`;
 
-/* ─────────────────────────────────────────
+/* ─── NUEVO: Prompt para generar etapas del timeline ─── */
+const STEPS_PROMPT = (info, brief) => `Eres un experto en diseño de proyectos para jóvenes profesionales.
+
+Con base en esta información genera entre 3 y 5 etapas de trabajo en JSON puro (sin markdown):
+
+Proyecto: "${info.title}"
+Área: "${info.area}"
+Duración: "${info.duration}"
+Nivel: "${info.level}"
+Resumen: "${brief.summary}"
+Objetivo: "${brief.objective}"
+Entregables: ${JSON.stringify(brief.deliverables)}
+
+Genera un array JSON con esta estructura exacta:
+[
+  {
+    "title": "Nombre corto de la etapa",
+    "duration": "X días",
+    "description": "Qué debe hacer el candidato en esta etapa (2 oraciones concretas)",
+    "tasks": ["Tarea específica 1", "Tarea específica 2"],
+    "criteria": ["Criterio de evaluación 1", "Criterio 2"]
+  }
+]
+
+Reglas:
+- Las etapas deben ser secuenciales y progresivas
+- Cada etapa debe tener 2-3 tareas concretas y medibles
+- Los criterios deben ser evaluables
+- La suma de duraciones debe aproximarse a "${info.duration}"
+- Responde SOLO con el array JSON, sin texto adicional`;
+
+/* ═══════════════════════════════════════
    COMPONENTE PRINCIPAL
-───────────────────────────────────────── */
+═══════════════════════════════════════ */
 export default function CrearProyecto() {
   const navigate = useNavigate();
 
@@ -86,6 +118,7 @@ export default function CrearProyecto() {
   const [brief, setBrief] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [publishingMsg, setPublishingMsg] = useState("Publicando...");
   const [toast, setToast] = useState(null);
   const [tipIdx] = useState(() => Math.floor(Math.random() * 3));
   const messagesEndRef = useRef(null);
@@ -94,7 +127,11 @@ export default function CrearProyecto() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, aiLoading]);
 
-  const tips = ["Sé específico en los entregables — ayuda a los candidatos a saber qué producir.", "Proyectos de 2-3 semanas suelen atraer más postulantes.", "Mencionar herramientas concretas (Canva, Figma...) ayuda a filtrar mejores candidatos."];
+  const tips = [
+    "Sé específico en los entregables — ayuda a los candidatos a saber qué producir.",
+    "Proyectos de 2-3 semanas suelen atraer más postulantes.",
+    "Mencionar herramientas concretas (Canva, Figma...) ayuda a filtrar mejores candidatos.",
+  ];
 
   /* ── Validar paso 1 ── */
   const validateInfo = () => {
@@ -170,7 +207,9 @@ export default function CrearProyecto() {
         setQuestionCount((prev) => prev + 1);
       }
     } catch {
-      const fallback = questionCount >= 4 ? "¡Perfecto! Ya tengo suficiente información. [GENERAR_BRIEF]" : "Entendido. ¿Tienes algún ejemplo o material de apoyo para el candidato?";
+      const fallback = questionCount >= 4
+        ? "¡Perfecto! Ya tengo suficiente información. [GENERAR_BRIEF]"
+        : "Entendido. ¿Tienes algún ejemplo o material de apoyo para el candidato?";
       setMessages((prev) => [...prev, { role: "ai", content: fallback }]);
       if (questionCount >= 4) setChatDone(true);
       setQuestionCount((prev) => prev + 1);
@@ -210,11 +249,43 @@ export default function CrearProyecto() {
     setGenerating(false);
   };
 
-  /* ── Publicar ── */
+  /* ── Publicar — CORREGIDO: ahora genera y envía las etapas ── */
   const publishJob = async (status) => {
     setPublishing(true);
+    setPublishingMsg("Generando etapas con IA...");
+
     try {
-      await fetch("/api/jobs", {
+      // Paso 1: Generar etapas del timeline con IA
+      let steps = [];
+      try {
+        const stepsRes = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 1500,
+            messages: [{ role: "user", content: STEPS_PROMPT(info, brief) }],
+          }),
+        });
+        const stepsData = await stepsRes.json();
+        const stepsText = stepsData.content?.[0]?.text || "[]";
+        const clean = stepsText.replace(/```json|```/g, "").trim();
+        steps = JSON.parse(clean);
+      } catch {
+        // Fallback: generar etapas desde los deliverables si la IA falla
+        steps = (brief.deliverables || []).map((d, i) => ({
+          title: `Etapa ${i + 1}: ${d}`,
+          duration: "3 días",
+          description: `Desarrolla y entrega: ${d}. Documenta el proceso y los resultados obtenidos.`,
+          tasks: [d, "Documenta el proceso realizado", "Prepara una breve presentación del resultado"],
+          criteria: ["Calidad del entregable", "Claridad de la documentación", "Cumplimiento del plazo"],
+        }));
+      }
+
+      setPublishingMsg("Guardando proyecto...");
+
+      // Paso 2: Guardar job + etapas en la BD
+      const res = await fetch("/api/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -226,19 +297,28 @@ export default function CrearProyecto() {
           profile_area: info.area,
           duration: info.duration,
           status,
+          steps, // ← etapas generadas por la IA
         }),
       });
-      await new Promise((r) => setTimeout(r, 1000));
-      setToast({ type: "success", msg: status === "published" ? "¡Proyecto publicado! 🎉" : "Guardado como borrador" });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al publicar el proyecto.");
+
+      setToast({
+        type: "success",
+        msg: status === "published" ? "¡Proyecto publicado con éxito! 🎉" : "Guardado como borrador",
+      });
       setTimeout(() => {
         setToast(null);
         navigate("/empresa");
       }, 2500);
-    } catch {
-      setToast({ type: "error", msg: "Error al guardar. Intenta de nuevo." });
+    } catch (err) {
+      setToast({ type: "error", msg: err.message || "Error al guardar. Intenta de nuevo." });
       setTimeout(() => setToast(null), 3000);
     }
+
     setPublishing(false);
+    setPublishingMsg("Publicando...");
   };
 
   const progressItems = [
@@ -251,18 +331,22 @@ export default function CrearProyecto() {
   /* ─── RENDER ─── */
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
+
       {/* ── TOPBAR ── */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-[5%] h-15 flex items-center justify-between">
         <a href="/empresa" className="flex items-center gap-2 no-underline cursor-pointer">
           <div className="w-7.5 h-7.5 bg-[#F26419] rounded-lg flex items-center justify-center">
-            <i className="fi fi-sr-bolt text-white"></i>{" "}
+            <i className="fi fi-sr-bolt text-white" />
           </div>
           <span className="font-bold text-lg text-gray-900">Impulso</span>
         </a>
-        <button onClick={() => (step > 1 ? setStep((s) => s - 1) : navigate("/empresa"))} className="flex items-center gap-1.5 text-sm font-medium text-gray-500 bg-transparent border-none cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all">
-          <i className="fi fi-br-angle-small-left"></i>
+        <Button
+          onClick={() => (step > 1 ? setStep((s) => s - 1) : navigate("/empresa"))}
+          className="flex items-center gap-1.5 text-sm font-medium text-gray-500 bg-transparent border-none cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all"
+        >
+          <i className="fi fi-br-angle-small-left" />
           {step > 1 ? "Paso anterior" : "Volver al dashboard"}
-        </button>
+        </Button>
       </header>
 
       {/* ── STEPPER ── */}
@@ -274,16 +358,12 @@ export default function CrearProyecto() {
         ].map((s) => (
           <div key={s.n} className="flex items-center">
             <div className="flex items-center gap-2.5 py-4">
-              <div
-                className={`w-6.5 h-6.5 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                ${step === s.n ? "bg-[#F26419] text-white" : step > s.n ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}
-              >
+              <div className={`w-6.5 h-6.5 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                ${step === s.n ? "bg-[#F26419] text-white" : step > s.n ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>
                 {step > s.n ? <CheckIcon /> : s.n}
               </div>
-              <span
-                className={`text-sm font-medium transition-all
-                ${step === s.n ? "text-gray-900 font-semibold" : step > s.n ? "text-green-500" : "text-gray-500"}`}
-              >
+              <span className={`text-sm font-medium transition-all
+                ${step === s.n ? "text-gray-900 font-semibold" : step > s.n ? "text-green-500" : "text-gray-500"}`}>
                 {s.label}
               </span>
             </div>
@@ -294,11 +374,14 @@ export default function CrearProyecto() {
 
       {/* ── MAIN ── */}
       <main className="flex-1 px-[5%] py-10 max-w-250 mx-auto w-full">
+
         {/* ════ PASO 1: INFO BÁSICA ════ */}
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-9 shadow-sm">
             <h2 className="text-2xl font-bold tracking-tight mb-1.5">Cuéntanos sobre tu proyecto</h2>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">Con esta información, nuestra IA te ayudará a construir un brief completo que atraiga a los mejores candidatos.</p>
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+              Con esta información, nuestra IA te ayudará a construir un brief completo que atraiga a los mejores candidatos.
+            </p>
 
             <div className="grid grid-cols-2 gap-5">
               {/* Título */}
@@ -330,9 +413,7 @@ export default function CrearProyecto() {
                   onChange={(e) => setInfo({ ...info, area: e.target.value })}
                 >
                   <option value="">Selecciona el área</option>
-                  {AREAS.map((a) => (
-                    <option key={a}>{a}</option>
-                  ))}
+                  {AREAS.map((a) => <option key={a}>{a}</option>)}
                 </select>
                 {infoErrors.area && <span className="text-xs text-red-500">{infoErrors.area}</span>}
               </div>
@@ -350,9 +431,7 @@ export default function CrearProyecto() {
                   onChange={(e) => setInfo({ ...info, duration: e.target.value })}
                 >
                   <option value="">Selecciona la duración</option>
-                  {DURATIONS.map((d) => (
-                    <option key={d}>{d}</option>
-                  ))}
+                  {DURATIONS.map((d) => <option key={d}>{d}</option>)}
                 </select>
                 {infoErrors.duration && <span className="text-xs text-red-500">{infoErrors.duration}</span>}
               </div>
@@ -364,18 +443,20 @@ export default function CrearProyecto() {
                 </label>
                 <div className="flex gap-2.5 flex-wrap">
                   {LEVELS.map((l) => (
-                    <button
+                    <Button
                       key={l}
                       type="button"
                       onClick={() => setInfo({ ...info, level: l })}
                       className={`flex-1 min-w-30 px-4 py-3 border-[1.5px] rounded-xl text-sm font-medium cursor-pointer transition-all
-                        ${info.level === l ? "border-[#F26419] bg-[#FEF0E8] text-[#F26419] font-bold" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#F26419] hover:bg-[#FEF0E8] hover:text-[#F26419]"}`}
+                        ${info.level === l
+                          ? "border-[#F26419] bg-[#FEF0E8] text-[#F26419] font-bold"
+                          : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#F26419] hover:bg-[#FEF0E8] hover:text-[#F26419]"}`}
                     >
                       {l === "Explorador" && "🌱 "}
                       {l === "Practicante" && "🚀 "}
                       {l === "Junior Validado" && "⭐ "}
                       {l}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 {infoErrors.level && <span className="text-xs text-red-500">{infoErrors.level}</span>}
@@ -399,9 +480,12 @@ export default function CrearProyecto() {
             </div>
 
             <div className="flex justify-end mt-8">
-              <button onClick={startChat} className="flex items-center gap-2 px-7 py-3 bg-[#F26419] text-white font-bold text-sm rounded-full cursor-pointer border-none transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_5px_16px_rgba(242,100,25,0.28)]">
-                Continuar con IA <i className="fi fi-rr-arrow-right text-white"></i>
-              </button>
+              <Button
+                onClick={startChat}
+                className="flex items-center gap-2 px-7 py-3 bg-[#F26419] text-white font-bold text-sm rounded-full cursor-pointer border-none transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_5px_16px_rgba(242,100,25,0.28)]"
+              >
+                Continuar con IA <i className="fi fi-rr-arrow-right text-white" />
+              </Button>
             </div>
           </div>
         )}
@@ -428,22 +512,17 @@ export default function CrearProyecto() {
               <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 scroll-smooth [scrollbar-width:thin]">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 animate-[msgIn_0.25s_ease] ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5
-                      ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}
-                    >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5
+                      ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}>
                       {m.role === "ai" ? "🤖" : "😎"}
                     </div>
-                    <div
-                      className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed
-                      ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}
-                    >
+                    <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed
+                      ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}>
                       {m.content}
                     </div>
                   </div>
                 ))}
 
-                {/* Typing indicator */}
                 {aiLoading && (
                   <div className="flex gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#F26419] to-[#C94E0D] flex items-center justify-center text-sm">🤖</div>
@@ -474,30 +553,32 @@ export default function CrearProyecto() {
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   disabled={aiLoading || chatDone}
                 />
-                <button onClick={sendMessage} disabled={aiLoading || chatDone || !userInput.trim()} className="w-10 h-10 rounded-full bg-[#F26419] border-none cursor-pointer flex items-center justify-center shrink-0 transition-all hover:bg-[#C94E0D] hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100">
-                  <i className="fi fi-sr-paper-plane-launch"></i>{" "}
-                </button>
+                <Button
+                  onClick={sendMessage}
+                  disabled={aiLoading || chatDone || !userInput.trim()}
+                  className="w-10 h-10 rounded-full bg-[#F26419] border-none cursor-pointer flex items-center justify-center shrink-0 transition-all hover:bg-[#C94E0D] hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
+                >
+                  <i className="fi fi-sr-paper-plane-launch" />
+                </Button>
               </div>
             </div>
 
             {/* Sidebar */}
             <div className="flex flex-col gap-4 max-lg:hidden">
-              {/* Progreso */}
               <div className="bg-white rounded-2xl border border-gray-200 p-5">
                 <p className="text-sm font-bold text-gray-900 mb-3.5">Progreso del brief</p>
                 {progressItems.map((item, i) => (
                   <div key={i} className="flex items-center gap-2.5 mb-2.5 text-sm text-gray-500">
-                    <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 transition-all
-                      ${item.done ? "bg-green-500" : questionCount === i + 1 ? "bg-[#F26419] animate-pulse" : "bg-gray-200"}`}
-                    >
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 transition-all
+                      ${item.done ? "bg-green-500" : questionCount === i + 1 ? "bg-[#F26419] animate-pulse" : "bg-gray-200"}`}>
                       {item.done ? <CheckIcon /> : i + 1}
                     </div>
-                    <span className={item.done ? "text-green-500" : questionCount === i + 1 ? "text-gray-900" : "text-gray-400"}>{item.label}</span>
+                    <span className={item.done ? "text-green-500" : questionCount === i + 1 ? "text-gray-900" : "text-gray-400"}>
+                      {item.label}
+                    </span>
                   </div>
                 ))}
               </div>
-              {/* Tip */}
               <div className="bg-[#FEF0E8] rounded-2xl border border-[#F26419]/15 p-4.5">
                 <p className="text-[11px] font-bold tracking-wide uppercase text-[#F26419] mb-2">💡 Consejo</p>
                 <p className="text-sm text-gray-700 leading-relaxed">{tips[tipIdx]}</p>
@@ -511,13 +592,15 @@ export default function CrearProyecto() {
           <div className="grid grid-cols-[1fr_320px] gap-5 max-lg:grid-cols-1">
             {/* Preview principal */}
             <div className="bg-white rounded-2xl border border-gray-200 p-9 shadow-sm">
-              <div className="inline-flex items-center gap-1.5 bg-[#FEF0E8] text-[#F26419] text-[11px] font-bold tracking-wide uppercase px-3 py-1 rounded-full mb-4">✨ Generado por IA</div>
+              <div className="inline-flex items-center gap-1.5 bg-[#FEF0E8] text-[#F26419] text-[11px] font-bold tracking-wide uppercase px-3 py-1 rounded-full mb-4">
+                ✨ Generado por IA
+              </div>
               <h1 className="text-[26px] font-bold tracking-tight mb-2">{info.title}</h1>
               <div className="flex gap-4 flex-wrap mb-6">
                 {[
                   { icon: <ClockIcon />, text: info.duration },
-                  { icon: <TagIcon />, text: info.area },
-                  { icon: <UserIcon />, text: info.level },
+                  { icon: <TagIcon />,   text: info.area },
+                  { icon: <UserIcon />,  text: info.level },
                 ].map(({ icon, text }) => (
                   <span key={text} className="flex items-center gap-1.5 text-sm text-gray-500">
                     {icon} {text}
@@ -526,10 +609,10 @@ export default function CrearProyecto() {
               </div>
 
               {[
-                { title: "Descripción del proyecto", content: brief.summary },
-                { title: "Objetivo", content: brief.objective },
-                { title: "Contexto", content: brief.context },
-                { title: "Apoyo al candidato", content: brief.support },
+                { title: "Descripción del proyecto", content: brief.summary   },
+                { title: "Objetivo",                 content: brief.objective },
+                { title: "Contexto",                 content: brief.context   },
+                { title: "Apoyo al candidato",       content: brief.support   },
               ].map(({ title, content }) => (
                 <div key={title} className="mb-6">
                   <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{title}</h4>
@@ -538,8 +621,8 @@ export default function CrearProyecto() {
               ))}
 
               {[
-                { title: "Entregables", items: brief.deliverables },
-                { title: "Habilidades requeridas", items: brief.skills },
+                { title: "Entregables",           items: brief.deliverables },
+                { title: "Habilidades requeridas", items: brief.skills      },
               ].map(({ title, items }) => (
                 <div key={title} className="mb-6">
                   <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{title}</h4>
@@ -553,6 +636,14 @@ export default function CrearProyecto() {
                   </ul>
                 </div>
               ))}
+
+              {/* Aviso de etapas */}
+              <div className="flex items-center gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 mt-2">
+                <i className="fi fi-rr-info text-[#F26419] text-sm" />
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Al publicar, la IA generará automáticamente las <strong>etapas del timeline</strong> que el candidato deberá completar.
+                </p>
+              </div>
             </div>
 
             {/* Aside */}
@@ -562,7 +653,7 @@ export default function CrearProyecto() {
                 <p className="text-sm font-bold mb-3.5">Resumen del proyecto</p>
                 {[
                   { label: "Duración", value: info.duration },
-                  { label: "Área", value: info.area },
+                  { label: "Área",     value: info.area     },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center mb-2.5">
                     <span className="text-sm text-gray-500">{label}</span>
@@ -578,25 +669,43 @@ export default function CrearProyecto() {
               {/* Publicar */}
               <div className="bg-white rounded-2xl border border-gray-200 p-5">
                 <p className="text-sm font-bold mb-2">¿Todo se ve bien?</p>
-                <p className="text-sm text-gray-500 mb-4 leading-relaxed">Puedes publicarlo ahora o guardarlo como borrador.</p>
-                <button
+                <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+                  Puedes publicarlo ahora o guardarlo como borrador.
+                </p>
+                <Button
                   onClick={() => publishJob("published")}
                   disabled={publishing}
                   className="w-full py-3.75 bg-[#F26419] text-white border-none rounded-full font-bold text-[15px] cursor-pointer flex items-center justify-center gap-2 transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,100,25,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
                 >
-                  {publishing ? "Publicando..." : "Publicar proyecto"}
-                </button>
-                <button onClick={() => publishJob("draft")} disabled={publishing} className="w-full py-3 mt-2.5 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50">
+                  {publishing ? (
+                    <span className="flex items-center gap-2">
+                      <i className="fi fi-rr-spinner animate-spin text-sm" />
+                      {publishingMsg}
+                    </span>
+                  ) : (
+                    "Publicar proyecto"
+                  )}
+                </Button>
+                <Button
+                  onClick={() => publishJob("draft")}
+                  disabled={publishing}
+                  className="w-full py-3 mt-2.5 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50"
+                >
                   Guardar como borrador
-                </button>
+                </Button>
               </div>
 
               {/* Volver al chat */}
               <div className="bg-[#FEF0E8] rounded-2xl border border-[#F26419]/15 p-5">
-                <p className="text-sm text-gray-700 leading-relaxed mb-3">🔁 ¿Quieres hacer cambios? Vuelve al chat para ajustar el brief.</p>
-                <button onClick={() => setStep(2)} className="w-full py-3 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-white">
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                  🔁 ¿Quieres hacer cambios? Vuelve al chat para ajustar el brief.
+                </p>
+                <Button
+                  onClick={() => setStep(2)}
+                  className="w-full py-3 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-white"
+                >
                   Volver al chat
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -605,14 +714,24 @@ export default function CrearProyecto() {
 
       {/* ── TOAST ── */}
       {toast && (
-        <div
-          className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-9999 animate-[slideUp_0.3s_ease]
-          ${toast.type === "success" ? "bg-green-500 text-white" : toast.type === "error" ? "bg-red-500 text-white" : "bg-gray-900 text-white"}`}
-        >
+        <div className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-9999 animate-[slideUp_0.3s_ease]
+          ${toast.type === "success" ? "bg-green-500 text-white" : toast.type === "error" ? "bg-red-500 text-white" : "bg-gray-900 text-white"}`}>
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
+
       <Footer />
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes msgIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

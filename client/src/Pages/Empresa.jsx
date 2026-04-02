@@ -5,6 +5,8 @@ import SideBar from "../Components/Sidebar";
 import StatsCards from "../Components/StatsCards";
 import Footer from "../Components/Footer";
 
+import { Button } from "@heroui/react";
+
 const STATUS = {
   published: { label: "Activo", dot: "bg-green-400", pill: "bg-green-50 text-green-600 border border-green-200" },
   draft: { label: "Borrador", dot: "bg-amber-400", pill: "bg-amber-50 text-amber-600 border border-amber-200" },
@@ -44,7 +46,7 @@ function ProjectCard({ job, navigate }) {
   const count = parseInt(job.applications_count) || 0;
 
   return (
-    <div onClick={() => navigate("/empresa/timeline")} className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all duration-200 cursor-pointer overflow-hidden">
+    <div onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)} className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all duration-200 cursor-pointer overflow-hidden">
       <div className={`h-1 bg-linear-to-r ${color} w-full`} />
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -176,7 +178,7 @@ export default function Empresa() {
               </h2>
               <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl p-1">
                 {filterTabs.map((f) => (
-                  <button
+                  <Button
                     key={f.key}
                     onClick={() => setFilter(f.key)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-lg border-none cursor-pointer transition-all flex items-center gap-1.5
@@ -189,7 +191,7 @@ export default function Empresa() {
                     >
                       {f.count}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

@@ -7,6 +7,8 @@ import Candidato from "./Pages/Candidato";
 import Empresa from "./Pages/Empresa";
 import CrearProyecto from "./Pages/CrearProyecto";
 import Timeline from "./Pages/Timeline";
+import ProyectoDetalle from "./Pages/ProyectoDetalle";
+import Postulantes from "./Pages/Postulantes";
 
 function App() {
   return (
@@ -15,7 +17,6 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
 
-      
       {/* Rutas privadas */}
       <Route
         path="/candidato"
@@ -36,7 +37,11 @@ function App() {
 
       {/* Rutas por rol */}
       <Route path="/empresa/crear-proyecto" element={<CrearProyecto />} />
-      <Route path="/empresa/timeline" element={<Timeline />} />
+
+      <Route path="/candidato/timeline/:applicationId" element={<Timeline />} />
+      <Route path="/proyecto/:id" element={<ProyectoDetalle />} />
+      <Route path="/empresa/proyecto/:jobId/postulantes" element={<Postulantes />} />
+
     </Routes>
   );
 }

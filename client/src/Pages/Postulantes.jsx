@@ -1,0 +1,594 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import SideBar from "../Components/Sidebar";
+import Footer from "../Components/Footer";
+
+/* ── Status config ── */
+const APP_STATUS = {
+  pending:  { label: "Pendiente",  pill: "bg-amber-50 text-amber-600 border-amber-200",  icon: "fi-rr-clock"        },
+  approved: { label: "Aprobado",   pill: "bg-green-50 text-green-600 border-green-200",  icon: "fi-rr-check-circle" },
+  rejected: { label: "Rechazado",  pill: "bg-red-50 text-red-500 border-red-200",        icon: "fi-rr-cross-circle" },
+};
+
+const CARD_COLORS = [
+  "from-orange-400 to-rose-400",
+  "from-violet-400 to-purple-500",
+  "from-teal-400 to-cyan-500",
+  "from-blue-400 to-indigo-500",
+  "from-green-400 to-emerald-500",
+];
+
+/* ── Skeleton ── */
+function Skeleton() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-gray-100" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-4 bg-gray-100 rounded w-1/3" />
+              <div className="h-3 bg-gray-100 rounded w-1/2" />
+            </div>
+            <div className="h-8 bg-gray-100 rounded-xl w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Avatar de candidato ── */
+function Avatar({ name, color }) {
+  const initials = name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "??";
+  return (
+    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
+      {initials}
+    </div>
+  );
+}
+
+/* ── Card de candidato ── */
+function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, updating }) {
+  const st    = APP_STATUS[applicant.status] || APP_STATUS.pending;
+  const color = CARD_COLORS[index % CARD_COLORS.length];
+  const steps = parseInt(applicant.steps_completed) || 0;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all p-5">
+      <div className="flex items-center gap-4 flex-wrap">
+
+        {/* Avatar + info */}
+        <Avatar name={applicant.candidate_name} color={color} />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-gray-900 text-sm truncate">
+            {applicant.candidate_name}
+          </p>
+          <p className="text-xs text-gray-400 truncate">{applicant.candidate_email}</p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Se postuló el {new Date(applicant.created_at).toLocaleDateString("es-CO", {
+              day: "numeric", month: "short", year: "numeric",
+            })}
+          </p>
+        </div>
+
+        {/* Etapas completadas */}
+        {applicant.status === "approved" && (
+          <div className="text-center px-3">
+            <p className="text-lg font-black text-[#F26419]">{steps}</p>
+            <p className="text-[10px] text-gray-400 leading-tight">etapas<br/>completadas</p>
+          </div>
+        )}
+
+        {/* Status badge */}
+        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${st.pill}`}>
+          <i className={`fi ${st.icon} text-[10px]`} />
+          {st.label}
+        </span>
+
+        {/* Acciones */}
+        <div className="flex gap-2 flex-wrap">
+          {applicant.status === "pending" && (
+            <>
+              <button
+                onClick={() => onApprove(applicant.id)}
+                disabled={updating === applicant.id}
+                className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-green-600 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                <i className="fi fi-rr-check text-[11px]" />
+                {updating === applicant.id ? "..." : "Aprobar"}
+              </button>
+              <button
+                onClick={() => onReject(applicant.id)}
+                disabled={updating === applicant.id}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white text-red-500 border border-red-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i className="fi fi-rr-cross text-[11px]" />
+                Rechazar
+              </button>
+            </>
+          )}
+
+          {applicant.status === "approved" && (
+            <button
+              onClick={() => onViewProgress(applicant.id, applicant.candidate_name)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#F26419] text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5"
+            >
+              <i className="fi fi-rr-eye text-[11px]" />
+              Ver entregas
+            </button>
+          )}
+
+          {applicant.status === "rejected" && (
+            <button
+              onClick={() => onApprove(applicant.id)}
+              disabled={updating === applicant.id}
+              className="flex items-center gap-1.5 px-4 py-2 bg-white text-gray-500 border border-gray-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50"
+            >
+              Reconsiderar
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Modal de entregas + feedback ── */
+function ProgressModal({ applicationId, candidateName, jobTitle, onClose }) {
+  const [steps, setSteps]         = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [feedbacks, setFeedbacks] = useState({});
+  const [scores, setScores]       = useState({});
+  const [saving, setSaving]       = useState(null);
+  const [saved, setSaved]         = useState({});
+
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const res = await fetch(`/api/submissions/${applicationId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = await res.json();
+        setSteps(data.steps || []);
+
+        // Pre-cargar feedbacks existentes
+        const fb = {};
+        const sc = {};
+        data.steps.forEach((s) => {
+          if (s.feedback_text) fb[s.submission_id] = s.feedback_text;
+          if (s.score)         sc[s.submission_id] = s.score;
+        });
+        setFeedbacks(fb);
+        setScores(sc);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSteps();
+  }, [applicationId]);
+
+  const handleSaveFeedback = async (submissionId) => {
+    if (!feedbacks[submissionId]?.trim()) return;
+    setSaving(submissionId);
+    try {
+      const res = await fetch(`/api/submissions/${submissionId}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          feedback_text: feedbacks[submissionId],
+          score: scores[submissionId] || null,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setSaved((prev) => ({ ...prev, [submissionId]: true }));
+      setTimeout(() => setSaved((prev) => ({ ...prev, [submissionId]: false })), 2500);
+    } catch {
+      alert("Error al guardar el feedback.");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const submittedSteps = steps.filter((s) => !!s.submission_id);
+
+  return (
+    /* Overlay */
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-6 overflow-y-auto"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-2xl w-full max-w-2xl my-6 overflow-hidden shadow-2xl">
+
+        {/* Header del modal */}
+        <div className="bg-[#1C1712] px-6 py-5 flex items-start justify-between">
+          <div>
+            <p className="text-xs font-semibold tracking-widest uppercase text-[#F26419] mb-1">
+              Entregas del candidato
+            </p>
+            <h3 className="text-white font-bold text-lg leading-tight">{candidateName}</h3>
+            <p className="text-white/40 text-xs mt-0.5">{jobTitle}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/40 hover:text-white transition-colors bg-none border-none cursor-pointer mt-1"
+          >
+            <i className="fi fi-rr-cross text-lg" />
+          </button>
+        </div>
+
+        {/* Cuerpo */}
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+
+          {loading && (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="animate-pulse bg-gray-50 rounded-xl p-4">
+                  <div className="h-4 bg-gray-100 rounded w-1/3 mb-2" />
+                  <div className="h-3 bg-gray-100 rounded w-full mb-1" />
+                  <div className="h-3 bg-gray-100 rounded w-4/5" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && submittedSteps.length === 0 && (
+            <div className="text-center py-10">
+              <i className="fi fi-rr-inbox text-3xl text-gray-300 block mb-3" />
+              <p className="text-gray-500 text-sm font-medium">El candidato aún no ha enviado entregas</p>
+              <p className="text-gray-400 text-xs mt-1">Las entregas aparecerán aquí a medida que avance</p>
+            </div>
+          )}
+
+          {!loading && submittedSteps.map((step) => (
+            <div key={step.step_id} className="border border-gray-100 rounded-2xl overflow-hidden">
+
+              {/* Header de etapa */}
+              <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-full bg-[#F26419] flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">{step.step_order}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">{step.step_title}</p>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(step.submitted_at).toLocaleDateString("es-CO", {
+                    day: "numeric", month: "short",
+                  })}
+                </span>
+              </div>
+
+              <div className="p-4 space-y-4">
+                {/* Respuesta del candidato */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                    Entrega del candidato
+                  </p>
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                      {step.answer_text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sección de feedback */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                    Tu feedback
+                  </p>
+
+                  <textarea
+                    value={feedbacks[step.submission_id] || ""}
+                    onChange={(e) => setFeedbacks((prev) => ({
+                      ...prev, [step.submission_id]: e.target.value,
+                    }))}
+                    placeholder="Escribe un feedback constructivo y honesto para el candidato..."
+                    className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-900 outline-none resize-y min-h-20 leading-relaxed transition-all focus:border-[#F26419] focus:bg-white focus:shadow-[0_0_0_3px_rgba(242,100,25,0.1)]"
+                  />
+
+                  {/* Puntaje */}
+                  <div className="flex items-center gap-2 mt-2 mb-3">
+                    <span className="text-xs text-gray-400">Puntaje:</span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <button
+                          key={n}
+                          onClick={() => setScores((prev) => ({ ...prev, [step.submission_id]: n }))}
+                          className={`text-lg transition-all cursor-pointer bg-none border-none p-0 leading-none hover:scale-110
+                            ${(scores[step.submission_id] || 0) >= n ? "text-amber-400" : "text-gray-200"}`}
+                        >
+                          <i className={`fi ${(scores[step.submission_id] || 0) >= n ? "fi-sr-star" : "fi-rr-star"}`} />
+                        </button>
+                      ))}
+                      {scores[step.submission_id] && (
+                        <span className="text-xs text-gray-400 ml-1 self-center">
+                          {scores[step.submission_id]}/5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Botón guardar */}
+                  <button
+                    onClick={() => handleSaveFeedback(step.submission_id)}
+                    disabled={saving === step.submission_id || !feedbacks[step.submission_id]?.trim()}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl border-none cursor-pointer transition-all
+                      ${saved[step.submission_id]
+                        ? "bg-green-500 text-white"
+                        : "bg-[#F26419] text-white hover:bg-[#C94E0D] hover:-translate-y-0.5"
+                      } disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none`}
+                  >
+                    {saving === step.submission_id ? (
+                      <><i className="fi fi-rr-spinner animate-spin" /> Guardando...</>
+                    ) : saved[step.submission_id] ? (
+                      <><i className="fi fi-rr-check" /> Guardado</>
+                    ) : (
+                      <><i className="fi fi-rr-paper-plane" /> Enviar feedback</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer del modal */}
+        <div className="border-t border-gray-100 px-6 py-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 text-sm font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+════════════════════════════════════════ */
+export default function Postulantes() {
+  const { jobId }  = useParams();
+  const navigate    = useNavigate();
+
+  const [job, setJob]               = useState(null);
+  const [applicants, setApplicants] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [updating, setUpdating]     = useState(null);
+  const [filter, setFilter]         = useState("all");
+  const [modal, setModal]           = useState(null); // { applicationId, candidateName }
+  const [toast, setToast]           = useState(null);
+
+  /* ── Cargar job + postulantes ── */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Datos del job
+        const jobRes = await fetch(`/api/jobs/${jobId}`);
+        if (!jobRes.ok) throw new Error("Proyecto no encontrado.");
+        const jobData = await jobRes.json();
+        setJob(jobData.job);
+
+        // Postulantes
+        const appRes = await fetch(`/api/applications?job_id=${jobId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!appRes.ok) throw new Error("Error al cargar postulantes.");
+        const appData = await appRes.json();
+        setApplicants(appData.applicants || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [jobId]);
+
+  /* ── Aprobar / Rechazar ── */
+  const updateStatus = async (applicationId, status) => {
+    setUpdating(applicationId);
+    try {
+      const res = await fetch(`/api/applications/${applicationId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al actualizar.");
+
+      setApplicants((prev) =>
+        prev.map((a) => a.id === applicationId ? { ...a, status } : a)
+      );
+      showToast("success", status === "approved" ? "Candidato aprobado ✓" : "Candidato rechazado");
+    } catch (err) {
+      showToast("error", err.message);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const showToast = (type, msg) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  /* ── Filtros ── */
+  const filtered = filter === "all"
+    ? applicants
+    : applicants.filter((a) => a.status === filter);
+
+  const counts = {
+    all:      applicants.length,
+    pending:  applicants.filter((a) => a.status === "pending").length,
+    approved: applicants.filter((a) => a.status === "approved").length,
+    rejected: applicants.filter((a) => a.status === "rejected").length,
+  };
+
+  const filterTabs = [
+    { key: "all",      label: "Todos"     },
+    { key: "pending",  label: "Pendientes"},
+    { key: "approved", label: "Aprobados" },
+    { key: "rejected", label: "Rechazados"},
+  ];
+
+  return (
+    <>
+      <div className="flex min-h-screen bg-gray-50">
+        <SideBar />
+
+        <main className="ml-24 flex-1 p-8">
+          <div className="max-w-4xl mx-auto">
+
+            {/* ── BACK ── */}
+            <button
+              onClick={() => navigate("/empresa")}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 bg-none border-none cursor-pointer transition-colors"
+            >
+              <i className="fi fi-rr-arrow-left text-xs" /> Volver al dashboard
+            </button>
+
+            {/* ── HEADER ── */}
+            <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase text-[#F26419] mb-1">
+                  Gestión de candidatos
+                </p>
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  {job?.title || "Cargando..."}
+                </h1>
+                <div className="flex items-center gap-3 mt-2 flex-wrap">
+                  {job?.duration && (
+                    <span className="flex items-center gap-1 text-xs text-gray-400">
+                      <i className="fi fi-rr-clock text-[10px]" /> {job.duration}
+                    </span>
+                  )}
+                  {job?.profile_area && (
+                    <span className="flex items-center gap-1 text-xs text-gray-400">
+                      <i className="fi fi-rr-tag text-[10px]" /> {job.profile_area}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1 text-xs text-gray-400">
+                    <i className="fi fi-rr-users text-[10px]" /> {applicants.length} postulante{applicants.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
+                <i className="fi fi-rr-exclamation text-red-400" />
+                <p className="text-sm text-red-500">{error}</p>
+              </div>
+            )}
+
+            {/* ── PANEL DE CANDIDATOS ── */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+
+              {/* Filtros */}
+              <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <i className="fi fi-rr-users text-[#F26419]" /> Postulantes
+                </h2>
+                <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl p-1">
+                  {filterTabs.map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setFilter(f.key)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg border-none cursor-pointer transition-all flex items-center gap-1.5
+                        ${filter === f.key
+                          ? "bg-white text-[#F26419] shadow-sm"
+                          : "bg-transparent text-gray-400 hover:text-gray-700"}`}
+                    >
+                      {f.label}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold
+                        ${filter === f.key ? "bg-orange-50 text-[#F26419]" : "bg-gray-100 text-gray-400"}`}>
+                        {counts[f.key]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lista */}
+              {loading && <Skeleton />}
+
+              {!loading && filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+                    <i className="fi fi-rr-users text-2xl text-gray-300" />
+                  </div>
+                  <p className="text-gray-500 font-medium text-sm mb-1">
+                    {filter === "all"
+                      ? "Aún no hay postulantes"
+                      : `Sin candidatos ${filter === "pending" ? "pendientes" : filter === "approved" ? "aprobados" : "rechazados"}`}
+                  </p>
+                  <p className="text-xs text-gray-400 max-w-xs">
+                    {filter === "all"
+                      ? "Cuando los candidatos se postulen aparecerán aquí."
+                      : "Prueba cambiando el filtro."}
+                  </p>
+                </div>
+              )}
+
+              {!loading && filtered.length > 0 && (
+                <div className="space-y-3">
+                  {filtered.map((applicant, i) => (
+                    <ApplicantCard
+                      key={applicant.id}
+                      applicant={applicant}
+                      index={i}
+                      updating={updating}
+                      onApprove={(id) => updateStatus(id, "approved")}
+                      onReject={(id)  => updateStatus(id, "rejected")}
+                      onViewProgress={(id, name) => setModal({ applicationId: id, candidateName: name })}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <Footer />
+
+      {/* Modal de entregas + feedback */}
+      {modal && (
+        <ProgressModal
+          applicationId={modal.applicationId}
+          candidateName={modal.candidateName}
+          jobTitle={job?.title || ""}
+          onClose={() => setModal(null)}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-50 animate-[slideUp_0.3s_ease]
+          ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
+          {toast.type === "success" ? "✅" : "❌"} {toast.msg}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </>
+  );
+}
