@@ -51,6 +51,10 @@ Haz exactamente 4 preguntas (una por mensaje):
 
 Después de las 4 respuestas termina con: "¡Perfecto! Voy a generar el brief completo. [GENERAR_BRIEF]"
 
+Los textos de la empresa pueden ser breves o incompletos, tú debes profundizar con preguntas claras y específicas para obtener toda la información necesaria.
+
+Los párrafos de tus respuestas deben dividirse en varios bloques para facilitar la lectura.
+
 Sé conciso, amable y profesional. Una pregunta a la vez. Responde en español.`;
 
 const BRIEF_PROMPT = (info, history) => `Con esta información genera un brief en JSON puro (sin markdown):
@@ -63,7 +67,7 @@ Estructura exacta:
   "summary": "Descripción en 3-4 oraciones",
   "objective": "Objetivo claro y medible",
   "deliverables": ["entregable 1", "entregable 2", "entregable 3"],
-  "skills": ["habilidad 1", "habilidad 2", "habilidad 3"],
+  "skills": ["habilidad 1", "habilidad 2", "habilidad 3, habilidad 4, ..."],
   "context": "Contexto de la organización",
   "support": "Recursos que recibirá el candidato"
 }
@@ -127,11 +131,7 @@ export default function CrearProyecto() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, aiLoading]);
 
-  const tips = [
-    "Sé específico en los entregables — ayuda a los candidatos a saber qué producir.",
-    "Proyectos de 2-3 semanas suelen atraer más postulantes.",
-    "Mencionar herramientas concretas (Canva, Figma...) ayuda a filtrar mejores candidatos.",
-  ];
+  const tips = ["Sé específico en los entregables — ayuda a los candidatos a saber qué producir.", "Proyectos de 2-3 semanas suelen atraer más postulantes.", "Mencionar herramientas concretas (Canva, Figma...) ayuda a filtrar mejores candidatos."];
 
   /* ── Validar paso 1 ── */
   const validateInfo = () => {
@@ -207,9 +207,7 @@ export default function CrearProyecto() {
         setQuestionCount((prev) => prev + 1);
       }
     } catch {
-      const fallback = questionCount >= 4
-        ? "¡Perfecto! Ya tengo suficiente información. [GENERAR_BRIEF]"
-        : "Entendido. ¿Tienes algún ejemplo o material de apoyo para el candidato?";
+      const fallback = questionCount >= 4 ? "¡Perfecto! Ya tengo suficiente información. [GENERAR_BRIEF]" : "Entendido. ¿Tienes algún ejemplo o material de apoyo para el candidato?";
       setMessages((prev) => [...prev, { role: "ai", content: fallback }]);
       if (questionCount >= 4) setChatDone(true);
       setQuestionCount((prev) => prev + 1);
@@ -331,7 +329,6 @@ export default function CrearProyecto() {
   /* ─── RENDER ─── */
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
-
       {/* ── TOPBAR ── */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-[5%] h-15 flex items-center justify-between">
         <a href="/empresa" className="flex items-center gap-2 no-underline cursor-pointer">
@@ -340,10 +337,7 @@ export default function CrearProyecto() {
           </div>
           <span className="font-bold text-lg text-gray-900">Impulso</span>
         </a>
-        <Button
-          onClick={() => (step > 1 ? setStep((s) => s - 1) : navigate("/empresa"))}
-          className="flex items-center gap-1.5 text-sm font-medium text-gray-500 bg-transparent border-none cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all"
-        >
+        <Button onClick={() => (step > 1 ? setStep((s) => s - 1) : navigate("/empresa"))} className="flex items-center gap-1.5 text-sm font-medium text-gray-500 bg-transparent border-none cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all">
           <i className="fi fi-br-angle-small-left" />
           {step > 1 ? "Paso anterior" : "Volver al dashboard"}
         </Button>
@@ -358,12 +352,16 @@ export default function CrearProyecto() {
         ].map((s) => (
           <div key={s.n} className="flex items-center">
             <div className="flex items-center gap-2.5 py-4">
-              <div className={`w-6.5 h-6.5 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                ${step === s.n ? "bg-[#F26419] text-white" : step > s.n ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>
+              <div
+                className={`w-6.5 h-6.5 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                ${step === s.n ? "bg-[#F26419] text-white" : step > s.n ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}
+              >
                 {step > s.n ? <CheckIcon /> : s.n}
               </div>
-              <span className={`text-sm font-medium transition-all
-                ${step === s.n ? "text-gray-900 font-semibold" : step > s.n ? "text-green-500" : "text-gray-500"}`}>
+              <span
+                className={`text-sm font-medium transition-all
+                ${step === s.n ? "text-gray-900 font-semibold" : step > s.n ? "text-green-500" : "text-gray-500"}`}
+              >
                 {s.label}
               </span>
             </div>
@@ -374,14 +372,11 @@ export default function CrearProyecto() {
 
       {/* ── MAIN ── */}
       <main className="flex-1 px-[5%] py-10 max-w-250 mx-auto w-full">
-
         {/* ════ PASO 1: INFO BÁSICA ════ */}
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-9 shadow-sm">
             <h2 className="text-2xl font-bold tracking-tight mb-1.5">Cuéntanos sobre tu proyecto</h2>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              Con esta información, nuestra IA te ayudará a construir un brief completo que atraiga a los mejores candidatos.
-            </p>
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">Con esta información, nuestra IA te ayudará a construir un brief completo que atraiga a los mejores candidatos.</p>
 
             <div className="grid grid-cols-2 gap-5">
               {/* Título */}
@@ -413,7 +408,9 @@ export default function CrearProyecto() {
                   onChange={(e) => setInfo({ ...info, area: e.target.value })}
                 >
                   <option value="">Selecciona el área</option>
-                  {AREAS.map((a) => <option key={a}>{a}</option>)}
+                  {AREAS.map((a) => (
+                    <option key={a}>{a}</option>
+                  ))}
                 </select>
                 {infoErrors.area && <span className="text-xs text-red-500">{infoErrors.area}</span>}
               </div>
@@ -431,7 +428,9 @@ export default function CrearProyecto() {
                   onChange={(e) => setInfo({ ...info, duration: e.target.value })}
                 >
                   <option value="">Selecciona la duración</option>
-                  {DURATIONS.map((d) => <option key={d}>{d}</option>)}
+                  {DURATIONS.map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
                 </select>
                 {infoErrors.duration && <span className="text-xs text-red-500">{infoErrors.duration}</span>}
               </div>
@@ -448,9 +447,7 @@ export default function CrearProyecto() {
                       type="button"
                       onClick={() => setInfo({ ...info, level: l })}
                       className={`flex-1 min-w-30 px-4 py-3 border-[1.5px] rounded-xl text-sm font-medium cursor-pointer transition-all
-                        ${info.level === l
-                          ? "border-[#F26419] bg-[#FEF0E8] text-[#F26419] font-bold"
-                          : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#F26419] hover:bg-[#FEF0E8] hover:text-[#F26419]"}`}
+                        ${info.level === l ? "border-[#F26419] bg-[#FEF0E8] text-[#F26419] font-bold" : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#F26419] hover:bg-[#FEF0E8] hover:text-[#F26419]"}`}
                     >
                       {l === "Explorador" && "🌱 "}
                       {l === "Practicante" && "🚀 "}
@@ -480,10 +477,7 @@ export default function CrearProyecto() {
             </div>
 
             <div className="flex justify-end mt-8">
-              <Button
-                onClick={startChat}
-                className="flex items-center gap-2 px-7 py-3 bg-[#F26419] text-white font-bold text-sm rounded-full cursor-pointer border-none transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_5px_16px_rgba(242,100,25,0.28)]"
-              >
+              <Button onClick={startChat} className="flex items-center gap-2 px-7 py-3 bg-[#F26419] text-white font-bold text-sm rounded-full cursor-pointer border-none transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_5px_16px_rgba(242,100,25,0.28)]">
                 Continuar con IA <i className="fi fi-rr-arrow-right text-white" />
               </Button>
             </div>
@@ -512,12 +506,16 @@ export default function CrearProyecto() {
               <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 scroll-smooth [scrollbar-width:thin]">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 animate-[msgIn_0.25s_ease] ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5
-                      ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5
+                      ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}
+                    >
                       {m.role === "ai" ? "🤖" : "😎"}
                     </div>
-                    <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed
-                      ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}>
+                    <div
+                      className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed
+                      ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}
+                    >
                       {m.content}
                     </div>
                   </div>
@@ -553,11 +551,7 @@ export default function CrearProyecto() {
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   disabled={aiLoading || chatDone}
                 />
-                <Button
-                  onClick={sendMessage}
-                  disabled={aiLoading || chatDone || !userInput.trim()}
-                  className="w-10 h-10 rounded-full bg-[#F26419] border-none cursor-pointer flex items-center justify-center shrink-0 transition-all hover:bg-[#C94E0D] hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
-                >
+                <Button onClick={sendMessage} disabled={aiLoading || chatDone || !userInput.trim()} className="w-10 h-10 rounded-full bg-[#F26419] border-none cursor-pointer flex items-center justify-center shrink-0 transition-all hover:bg-[#C94E0D] hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100">
                   <i className="fi fi-sr-paper-plane-launch" />
                 </Button>
               </div>
@@ -569,13 +563,13 @@ export default function CrearProyecto() {
                 <p className="text-sm font-bold text-gray-900 mb-3.5">Progreso del brief</p>
                 {progressItems.map((item, i) => (
                   <div key={i} className="flex items-center gap-2.5 mb-2.5 text-sm text-gray-500">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 transition-all
-                      ${item.done ? "bg-green-500" : questionCount === i + 1 ? "bg-[#F26419] animate-pulse" : "bg-gray-200"}`}>
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 transition-all
+                      ${item.done ? "bg-green-500" : questionCount === i + 1 ? "bg-[#F26419] animate-pulse" : "bg-gray-200"}`}
+                    >
                       {item.done ? <CheckIcon /> : i + 1}
                     </div>
-                    <span className={item.done ? "text-green-500" : questionCount === i + 1 ? "text-gray-900" : "text-gray-400"}>
-                      {item.label}
-                    </span>
+                    <span className={item.done ? "text-green-500" : questionCount === i + 1 ? "text-gray-900" : "text-gray-400"}>{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -592,15 +586,13 @@ export default function CrearProyecto() {
           <div className="grid grid-cols-[1fr_320px] gap-5 max-lg:grid-cols-1">
             {/* Preview principal */}
             <div className="bg-white rounded-2xl border border-gray-200 p-9 shadow-sm">
-              <div className="inline-flex items-center gap-1.5 bg-[#FEF0E8] text-[#F26419] text-[11px] font-bold tracking-wide uppercase px-3 py-1 rounded-full mb-4">
-                ✨ Generado por IA
-              </div>
+              <div className="inline-flex items-center gap-1.5 bg-[#FEF0E8] text-[#F26419] text-[11px] font-bold tracking-wide uppercase px-3 py-1 rounded-full mb-4">✨ Generado por IA</div>
               <h1 className="text-[26px] font-bold tracking-tight mb-2">{info.title}</h1>
               <div className="flex gap-4 flex-wrap mb-6">
                 {[
                   { icon: <ClockIcon />, text: info.duration },
-                  { icon: <TagIcon />,   text: info.area },
-                  { icon: <UserIcon />,  text: info.level },
+                  { icon: <TagIcon />, text: info.area },
+                  { icon: <UserIcon />, text: info.level },
                 ].map(({ icon, text }) => (
                   <span key={text} className="flex items-center gap-1.5 text-sm text-gray-500">
                     {icon} {text}
@@ -609,10 +601,10 @@ export default function CrearProyecto() {
               </div>
 
               {[
-                { title: "Descripción del proyecto", content: brief.summary   },
-                { title: "Objetivo",                 content: brief.objective },
-                { title: "Contexto",                 content: brief.context   },
-                { title: "Apoyo al candidato",       content: brief.support   },
+                { title: "Descripción del proyecto", content: brief.summary },
+                { title: "Objetivo", content: brief.objective },
+                { title: "Contexto", content: brief.context },
+                { title: "Apoyo al candidato", content: brief.support },
               ].map(({ title, content }) => (
                 <div key={title} className="mb-6">
                   <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{title}</h4>
@@ -621,8 +613,8 @@ export default function CrearProyecto() {
               ))}
 
               {[
-                { title: "Entregables",           items: brief.deliverables },
-                { title: "Habilidades requeridas", items: brief.skills      },
+                { title: "Entregables", items: brief.deliverables },
+                { title: "Habilidades requeridas", items: brief.skills },
               ].map(({ title, items }) => (
                 <div key={title} className="mb-6">
                   <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{title}</h4>
@@ -653,7 +645,7 @@ export default function CrearProyecto() {
                 <p className="text-sm font-bold mb-3.5">Resumen del proyecto</p>
                 {[
                   { label: "Duración", value: info.duration },
-                  { label: "Área",     value: info.area     },
+                  { label: "Área", value: info.area },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center mb-2.5">
                     <span className="text-sm text-gray-500">{label}</span>
@@ -669,9 +661,7 @@ export default function CrearProyecto() {
               {/* Publicar */}
               <div className="bg-white rounded-2xl border border-gray-200 p-5">
                 <p className="text-sm font-bold mb-2">¿Todo se ve bien?</p>
-                <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-                  Puedes publicarlo ahora o guardarlo como borrador.
-                </p>
+                <p className="text-sm text-gray-500 mb-4 leading-relaxed">Puedes publicarlo ahora o guardarlo como borrador.</p>
                 <Button
                   onClick={() => publishJob("published")}
                   disabled={publishing}
@@ -686,24 +676,15 @@ export default function CrearProyecto() {
                     "Publicar proyecto"
                   )}
                 </Button>
-                <Button
-                  onClick={() => publishJob("draft")}
-                  disabled={publishing}
-                  className="w-full py-3 mt-2.5 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50"
-                >
+                <Button onClick={() => publishJob("draft")} disabled={publishing} className="w-full py-3 mt-2.5 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50">
                   Guardar como borrador
                 </Button>
               </div>
 
               {/* Volver al chat */}
               <div className="bg-[#FEF0E8] rounded-2xl border border-[#F26419]/15 p-5">
-                <p className="text-sm text-gray-700 leading-relaxed mb-3">
-                  🔁 ¿Quieres hacer cambios? Vuelve al chat para ajustar el brief.
-                </p>
-                <Button
-                  onClick={() => setStep(2)}
-                  className="w-full py-3 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-white"
-                >
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">🔁 ¿Quieres hacer cambios? Vuelve al chat para ajustar el brief.</p>
+                <Button onClick={() => setStep(2)} className="w-full py-3 bg-transparent text-gray-600 border-[1.5px] border-gray-200 rounded-full font-medium text-sm cursor-pointer transition-all hover:bg-white">
                   Volver al chat
                 </Button>
               </div>
@@ -714,8 +695,10 @@ export default function CrearProyecto() {
 
       {/* ── TOAST ── */}
       {toast && (
-        <div className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-9999 animate-[slideUp_0.3s_ease]
-          ${toast.type === "success" ? "bg-green-500 text-white" : toast.type === "error" ? "bg-red-500 text-white" : "bg-gray-900 text-white"}`}>
+        <div
+          className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-9999 animate-[slideUp_0.3s_ease]
+          ${toast.type === "success" ? "bg-green-500 text-white" : toast.type === "error" ? "bg-red-500 text-white" : "bg-gray-900 text-white"}`}
+        >
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}

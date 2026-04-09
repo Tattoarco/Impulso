@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { Button } from "@heroui/react";
+import { useAuth } from "../Context/AuthContext";
 import SideBar from "../Components/Sidebar";
 import StatsCards from "../Components/StatsCards";
 import Footer from "../Components/Footer";
-
-import { Button } from "@heroui/react";
 
 const STATUS = {
   published: { label: "Activo", dot: "bg-green-400", pill: "bg-green-50 text-green-600 border border-green-200" },
@@ -108,7 +107,7 @@ function EmptyState({ filter, onCreateClick }) {
 
 export default function Empresa() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user, token } = useAuth();
 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +120,7 @@ export default function Empresa() {
       setError(null);
       try {
         const res = await fetch("/api/jobs/mine", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
           const data = await res.json();
@@ -135,8 +134,8 @@ export default function Empresa() {
         setLoading(false);
       }
     };
-    fetchJobs();
-  }, []);
+    if (token) fetchJobs();
+  }, [token]);
 
   const filtered = filter === "all" ? jobs : jobs.filter((j) => j.status === filter);
 
@@ -182,12 +181,12 @@ export default function Empresa() {
                     key={f.key}
                     onClick={() => setFilter(f.key)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-lg border-none cursor-pointer transition-all flex items-center gap-1.5
-                    ${filter === f.key ? "bg-white text-[#F26419] shadow-sm" : "bg-transparent text-gray-400 hover:text-gray-700"}`}
+                      ${filter === f.key ? "bg-white text-[#F26419] shadow-sm" : "bg-transparent text-gray-400 hover:text-gray-700"}`}
                   >
                     {f.label}
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold
-                    ${filter === f.key ? "bg-orange-50 text-[#F26419]" : "bg-gray-100 text-gray-400"}`}
+                      ${filter === f.key ? "bg-orange-50 text-[#F26419]" : "bg-gray-100 text-gray-400"}`}
                     >
                       {f.count}
                     </span>
@@ -196,7 +195,6 @@ export default function Empresa() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
                 <i className="fi fi-rr-exclamation text-red-400" />
@@ -207,7 +205,6 @@ export default function Empresa() {
               </div>
             )}
 
-            {/* Skeleton */}
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
@@ -216,10 +213,8 @@ export default function Empresa() {
               </div>
             )}
 
-            {/* Vacío */}
             {!loading && !error && filtered.length === 0 && <EmptyState filter={filter} onCreateClick={() => navigate("/empresa/crear-proyecto")} />}
 
-            {/* Grid */}
             {!loading && !error && filtered.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filtered.map((job) => (
@@ -235,9 +230,7 @@ export default function Empresa() {
             )}
           </div>
         </main>
-        <div></div>
       </div>
-
       <Footer />
     </>
   );

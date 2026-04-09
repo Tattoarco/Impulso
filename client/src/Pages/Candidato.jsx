@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { Button } from "@heroui/react";
-
+import { useAuth } from "../Context/AuthContext";
 import SideBar from "../Components/Sidebar";
 import Footer from "../Components/Footer";
 
@@ -15,15 +14,11 @@ const CARD_COLORS = [
 
 function ProjectCard({ job, navigate }) {
   const initials = job.title?.slice(0, 2).toUpperCase() || "PR";
-  const color =
-    CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] ||
-    CARD_COLORS[0];
+  const color    = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all overflow-hidden">
-      
       <div className={`h-1 bg-linear-to-r ${color}`} />
-
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex gap-3">
@@ -31,43 +26,27 @@ function ProjectCard({ job, navigate }) {
               {initials}
             </div>
             <div>
-              <h3 className="text-sm font-semibold group-hover:text-[#F26419]">
-                {job.title}
-              </h3>
-              <p className="text-xs text-gray-400">
-                {job.company_name || "Empresa"}
-              </p>
+              <h3 className="text-sm font-semibold group-hover:text-[#F26419]">{job.title}</h3>
+              <p className="text-xs text-gray-400">{job.company_name || "Empresa"}</p>
             </div>
           </div>
         </div>
-
-        <p className="text-xs text-gray-500 line-clamp-2 mb-3">
-          {job.summary}
-        </p>
-
+        <p className="text-xs text-gray-500 line-clamp-2 mb-3">{job.summary}</p>
         <div className="flex gap-3 text-xs text-gray-400">
-          <span>{job.duration}</span>
-          <span>{job.profile_area}</span>
+          {job.duration && <span className="flex items-center gap-1"><i className="fi fi-rr-clock text-[11px]" /> {job.duration}</span>}
+          {job.profile_area && <span className="flex items-center gap-1"><i className="fi fi-rr-tag text-[11px]" /> {job.profile_area}</span>}
         </div>
-
         <div className="mt-4 flex justify-between items-center">
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/proyecto/${job.id}`);
-            }}
+            onClick={(e) => { e.stopPropagation(); navigate(`/proyecto/${job.id}`); }}
             variant="ghost"
             className="text-xs text-[#F26419] cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition duration-200 hover:bg-orange-100"
           >
             Ver detalle
           </Button>
-
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log("Postular a", job.id);
-            }}
-            className=" bg-orange-500 text-white cursor-pointer hover:bg-orange-200 hover:text-orange-500 hover:shadow-md hover:-translate-y-0.5 transition duration-200"
+            onClick={(e) => { e.stopPropagation(); navigate(`/proyecto/${job.id}`); }}
+            className="bg-orange-500 text-white cursor-pointer hover:bg-orange-600 hover:shadow-md hover:-translate-y-0.5 transition duration-200"
           >
             Postular
           </Button>
@@ -87,21 +66,18 @@ function Skeleton() {
 }
 
 export default function Candidato() {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const navigate        = useNavigate();
+  const { user, token } = useAuth();
 
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs]       = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const res = await fetch("/api/jobs", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
         setJobs(data.jobs || []);
       } catch (err) {
@@ -110,29 +86,23 @@ export default function Candidato() {
         setLoading(false);
       }
     };
+    if (token) fetchJobs();
+  }, [token]);
 
-    fetchJobs();
-  }, []);
-
-  const hora = new Date().getHours();
-  const saludo =
-    hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+  const hora   = new Date().getHours();
+  const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
 
   return (
     <>
       <div className="flex min-h-screen bg-gray-50">
         <SideBar />
-
         <main className="ml-24 flex-1 p-8">
+
           {/* HEADER */}
           <div className="mb-8">
             <p className="text-sm text-gray-400">{saludo} 👋</p>
-            <h1 className="text-2xl font-bold">
-              {user?.name || "Candidato"}
-            </h1>
-            <p className="text-sm text-gray-400">
-              Explora proyectos y empieza a ganar experiencia
-            </p>
+            <h1 className="text-2xl font-bold">{user?.name || "Candidato"}</h1>
+            <p className="text-sm text-gray-400">Explora proyectos y empieza a ganar experiencia</p>
           </div>
 
           {/* LISTA */}
@@ -141,16 +111,12 @@ export default function Candidato() {
 
             {loading && (
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} />
-                ))}
+                {[1, 2, 3].map((i) => <Skeleton key={i} />)}
               </div>
             )}
 
             {!loading && jobs.length === 0 && (
-              <p className="text-gray-400 text-sm">
-                No hay proyectos disponibles aún
-              </p>
+              <p className="text-gray-400 text-sm">No hay proyectos disponibles aún</p>
             )}
 
             {!loading && jobs.length > 0 && (
@@ -163,7 +129,6 @@ export default function Candidato() {
           </div>
         </main>
       </div>
-
       <Footer />
     </>
   );
