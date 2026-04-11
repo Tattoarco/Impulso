@@ -1,4 +1,4 @@
-const pool = require('../../db/pool');
+const pool = require("../../db/pool");
 
 // Candidato se postula a una oferta
 async function applyToJob(req, res) {
@@ -6,31 +6,25 @@ async function applyToJob(req, res) {
   const candidateId = req.user.id;
 
   if (!job_id) {
-    return res.status(400).json({ error: 'El ID del proyecto es obligatorio.' });
+    return res.status(400).json({ error: "El ID del proyecto es obligatorio." });
   }
 
   try {
     // Verificar que el job existe y está publicado
-    const jobResult = await pool.query(
-      `SELECT id, status FROM jobs WHERE id = $1`,
-      [job_id]
-    );
+    const jobResult = await pool.query(`SELECT id, status FROM jobs WHERE id = $1`, [job_id]);
 
     if (jobResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Proyecto no encontrado.' });
+      return res.status(404).json({ error: "Proyecto no encontrado." });
     }
-    if (jobResult.rows[0].status !== 'published') {
-      return res.status(400).json({ error: 'Este proyecto no está disponible.' });
+    if (jobResult.rows[0].status !== "published") {
+      return res.status(400).json({ error: "Este proyecto no está disponible." });
     }
 
     // Verificar que no se haya postulado antes
-    const existing = await pool.query(
-      `SELECT id FROM applications WHERE job_id = $1 AND candidate_id = $2`,
-      [job_id, candidateId]
-    );
+    const existing = await pool.query(`SELECT id FROM applications WHERE job_id = $1 AND candidate_id = $2`, [job_id, candidateId]);
 
     if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'Ya te postulaste a este proyecto.' });
+      return res.status(409).json({ error: "Ya te postulaste a este proyecto." });
     }
 
     // Crear la postulación
@@ -38,16 +32,16 @@ async function applyToJob(req, res) {
       `INSERT INTO applications (job_id, candidate_id, status)
        VALUES ($1, $2, 'pending')
        RETURNING *`,
-      [job_id, candidateId]
+      [job_id, candidateId],
     );
 
     res.status(201).json({
-      message: 'Postulación enviada. La empresa revisará tu perfil.',
+      message: "Postulación enviada. La empresa revisará tu perfil.",
       application: result.rows[0],
     });
   } catch (err) {
-    console.error('Error en applyToJob:', err.message);
-    res.status(500).json({ error: 'Error al enviar la postulación.' });
+    console.error("Error en applyToJob:", err.message);
+    res.status(500).json({ error: "Error al enviar la postulación." });
   }
 }
 
@@ -57,7 +51,7 @@ async function getApplicants(req, res) {
   const userId = req.user.id;
 
   if (!job_id) {
-    return res.status(400).json({ error: 'job_id es obligatorio.' });
+    return res.status(400).json({ error: "job_id es obligatorio." });
   }
 
   try {
@@ -66,11 +60,11 @@ async function getApplicants(req, res) {
       `SELECT j.id FROM jobs j
        JOIN companies c ON c.id = j.company_id
        WHERE j.id = $1 AND c.user_id = $2`,
-      [job_id, userId]
+      [job_id, userId],
     );
 
     if (ownerCheck.rows.length === 0) {
-      return res.status(403).json({ error: 'No tienes permisos para ver este proyecto.' });
+      return res.status(403).json({ error: "No tienes permisos para ver este proyecto." });
     }
 
     const result = await pool.query(
@@ -86,13 +80,13 @@ async function getApplicants(req, res) {
        WHERE a.job_id = $1
        GROUP BY a.id, u.id, u.name, u.email
        ORDER BY a.created_at DESC`,
-      [job_id]
+      [job_id],
     );
 
     res.json({ applicants: result.rows });
   } catch (err) {
-    console.error('Error en getApplicants:', err.message);
-    res.status(500).json({ error: 'Error al obtener postulantes.' });
+    console.error("Error en getApplicants:", err.message);
+    res.status(500).json({ error: "Error al obtener postulantes." });
   }
 }
 
@@ -116,13 +110,13 @@ async function getMyApplications(req, res) {
        WHERE a.candidate_id = $1
        GROUP BY a.id, j.id, c.company_name
        ORDER BY a.created_at DESC`,
-      [candidateId]
+      [candidateId],
     );
 
     res.json({ applications: result.rows });
   } catch (err) {
-    console.error('Error en getMyApplications:', err.message);
-    res.status(500).json({ error: 'Error al obtener tus postulaciones.' });
+    console.error("Error en getMyApplications:", err.message);
+    res.status(500).json({ error: "Error al obtener tus postulaciones." });
   }
 }
 
@@ -132,7 +126,7 @@ async function updateApplicationStatus(req, res) {
   const { status } = req.body;
   const userId = req.user.id;
 
-  if (!['approved', 'rejected'].includes(status)) {
+  if (!["approved", "rejected"].includes(status)) {
     return res.status(400).json({ error: 'Estado inválido. Usa "approved" o "rejected".' });
   }
 
@@ -143,25 +137,22 @@ async function updateApplicationStatus(req, res) {
        JOIN jobs j ON j.id = a.job_id
        JOIN companies c ON c.id = j.company_id
        WHERE a.id = $1 AND c.user_id = $2`,
-      [id, userId]
+      [id, userId],
     );
 
     if (ownerCheck.rows.length === 0) {
-      return res.status(403).json({ error: 'No tienes permisos para esta acción.' });
+      return res.status(403).json({ error: "No tienes permisos para esta acción." });
     }
 
-    const result = await pool.query(
-      `UPDATE applications SET status = $1 WHERE id = $2 RETURNING *`,
-      [status, id]
-    );
+    const result = await pool.query(`UPDATE applications SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
 
     res.json({
-      message: status === 'approved' ? 'Candidato aprobado.' : 'Candidato rechazado.',
+      message: status === "approved" ? "Candidato aprobado." : "Candidato rechazado.",
       application: result.rows[0],
     });
   } catch (err) {
-    console.error('Error en updateApplicationStatus:', err.message);
-    res.status(500).json({ error: 'Error al actualizar el estado.' });
+    console.error("Error en updateApplicationStatus:", err.message);
+    res.status(500).json({ error: "Error al actualizar el estado." });
   }
 }
 
@@ -175,7 +166,7 @@ async function submitStep(req, res) {
   const candidateId = req.user.id;
 
   if (!application_id || !step_id || !answer_text?.trim()) {
-    return res.status(400).json({ error: 'application_id, step_id y answer_text son obligatorios.' });
+    return res.status(400).json({ error: "application_id, step_id y answer_text son obligatorios." });
   }
 
   try {
@@ -183,34 +174,28 @@ async function submitStep(req, res) {
     const appCheck = await pool.query(
       `SELECT a.id, a.status FROM applications a
        WHERE a.id = $1 AND a.candidate_id = $2`,
-      [application_id, candidateId]
+      [application_id, candidateId],
     );
 
     if (appCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Postulación no encontrada.' });
+      return res.status(404).json({ error: "Postulación no encontrada." });
     }
-    if (appCheck.rows[0].status !== 'approved') {
-      return res.status(403).json({ error: 'Tu postulación aún no ha sido aprobada.' });
+    if (appCheck.rows[0].status !== "approved") {
+      return res.status(403).json({ error: "Tu postulación aún no ha sido aprobada." });
     }
 
     // Verificar que no haya enviado esta etapa antes
-    const existing = await pool.query(
-      `SELECT id FROM submissions WHERE application_id = $1 AND step_id = $2`,
-      [application_id, step_id]
-    );
+    const existing = await pool.query(`SELECT id FROM submissions WHERE application_id = $1 AND step_id = $2`, [application_id, step_id]);
 
     if (existing.rows.length > 0) {
-      return res.status(409).json({ error: 'Ya enviaste una respuesta para esta etapa.' });
+      return res.status(409).json({ error: "Ya enviaste una respuesta para esta etapa." });
     }
 
     // Verificar que la etapa anterior está completada (orden secuencial)
-    const stepOrder = await pool.query(
-      `SELECT step_order, job_id FROM job_steps WHERE id = $1`,
-      [step_id]
-    );
+    const stepOrder = await pool.query(`SELECT step_order, job_id FROM job_steps WHERE id = $1`, [step_id]);
 
     if (stepOrder.rows.length === 0) {
-      return res.status(404).json({ error: 'Etapa no encontrada.' });
+      return res.status(404).json({ error: "Etapa no encontrada." });
     }
 
     const currentOrder = stepOrder.rows[0].step_order;
@@ -219,18 +204,18 @@ async function submitStep(req, res) {
       const prevStepResult = await pool.query(
         `SELECT js.id FROM job_steps js
          WHERE js.job_id = $1 AND js.step_order = $2`,
-        [stepOrder.rows[0].job_id, currentOrder - 1]
+        [stepOrder.rows[0].job_id, currentOrder - 1],
       );
 
       if (prevStepResult.rows.length > 0) {
         const prevDone = await pool.query(
           `SELECT id FROM submissions
            WHERE application_id = $1 AND step_id = $2`,
-          [application_id, prevStepResult.rows[0].id]
+          [application_id, prevStepResult.rows[0].id],
         );
 
         if (prevDone.rows.length === 0) {
-          return res.status(400).json({ error: 'Debes completar la etapa anterior primero.' });
+          return res.status(400).json({ error: "Debes completar la etapa anterior primero." });
         }
       }
     }
@@ -240,16 +225,16 @@ async function submitStep(req, res) {
       `INSERT INTO submissions (application_id, step_id, answer_text)
        VALUES ($1, $2, $3)
        RETURNING *`,
-      [application_id, step_id, answer_text.trim()]
+      [application_id, step_id, answer_text.trim()],
     );
 
     res.status(201).json({
-      message: 'Entrega enviada correctamente.',
+      message: "Entrega enviada correctamente.",
       submission: result.rows[0],
     });
   } catch (err) {
-    console.error('Error en submitStep:', err.message);
-    res.status(500).json({ error: 'Error al enviar la entrega.' });
+    console.error("Error en submitStep:", err.message);
+    res.status(500).json({ error: "Error al enviar la entrega." });
   }
 }
 
@@ -267,11 +252,11 @@ async function getSubmissions(req, res) {
        JOIN companies c ON c.id = j.company_id
        WHERE a.id = $1
          AND (a.candidate_id = $2 OR c.user_id = $2)`,
-      [application_id, userId]
+      [application_id, userId],
     );
 
     if (accessCheck.rows.length === 0) {
-      return res.status(403).json({ error: 'No tienes acceso a estas entregas.' });
+      return res.status(403).json({ error: "No tienes acceso a estas entregas." });
     }
 
     // Obtener todas las etapas del job con sus entregas (si las hay)
@@ -297,13 +282,13 @@ async function getSubmissions(req, res) {
        LEFT JOIN feedbacks f ON f.submission_id = s.id
        WHERE a.id = $1
        ORDER BY js.step_order ASC`,
-      [application_id]
+      [application_id],
     );
 
     res.json({ steps: result.rows });
   } catch (err) {
-    console.error('Error en getSubmissions:', err.message);
-    res.status(500).json({ error: 'Error al obtener las entregas.' });
+    console.error("Error en getSubmissions:", err.message);
+    res.status(500).json({ error: "Error al obtener las entregas." });
   }
 }
 
@@ -318,10 +303,10 @@ async function giveFeedback(req, res) {
   const userId = req.user.id;
 
   if (!feedback_text?.trim()) {
-    return res.status(400).json({ error: 'El feedback no puede estar vacío.' });
+    return res.status(400).json({ error: "El feedback no puede estar vacío." });
   }
   if (score && (score < 1 || score > 5)) {
-    return res.status(400).json({ error: 'El puntaje debe estar entre 1 y 5.' });
+    return res.status(400).json({ error: "El puntaje debe estar entre 1 y 5." });
   }
 
   try {
@@ -332,18 +317,15 @@ async function giveFeedback(req, res) {
        JOIN jobs j ON j.id = a.job_id
        JOIN companies c ON c.id = j.company_id
        WHERE s.id = $1 AND c.user_id = $2`,
-      [submission_id, userId]
+      [submission_id, userId],
     );
 
     if (ownerCheck.rows.length === 0) {
-      return res.status(403).json({ error: 'No tienes permisos para dar feedback aquí.' });
+      return res.status(403).json({ error: "No tienes permisos para dar feedback aquí." });
     }
 
     // Verificar que no haya feedback previo
-    const existing = await pool.query(
-      `SELECT id FROM feedbacks WHERE submission_id = $1`,
-      [submission_id]
-    );
+    const existing = await pool.query(`SELECT id FROM feedbacks WHERE submission_id = $1`, [submission_id]);
 
     if (existing.rows.length > 0) {
       // Actualizar el feedback existente
@@ -351,9 +333,9 @@ async function giveFeedback(req, res) {
         `UPDATE feedbacks SET feedback_text = $1, score = $2
          WHERE submission_id = $3
          RETURNING *`,
-        [feedback_text.trim(), score || null, submission_id]
+        [feedback_text.trim(), score || null, submission_id],
       );
-      return res.json({ message: 'Feedback actualizado.', feedback: updated.rows[0] });
+      return res.json({ message: "Feedback actualizado.", feedback: updated.rows[0] });
     }
 
     // Crear nuevo feedback
@@ -361,16 +343,16 @@ async function giveFeedback(req, res) {
       `INSERT INTO feedbacks (submission_id, company_id, feedback_text, score)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [submission_id, ownerCheck.rows[0].company_id, feedback_text.trim(), score || null]
+      [submission_id, ownerCheck.rows[0].company_id, feedback_text.trim(), score || null],
     );
 
     res.status(201).json({
-      message: 'Feedback enviado al candidato.',
+      message: "Feedback enviado al candidato.",
       feedback: result.rows[0],
     });
   } catch (err) {
-    console.error('Error en giveFeedback:', err.message);
-    res.status(500).json({ error: 'Error al guardar el feedback.' });
+    console.error("Error en giveFeedback:", err.message);
+    res.status(500).json({ error: "Error al guardar el feedback." });
   }
 }
 

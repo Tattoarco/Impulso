@@ -114,3 +114,4 @@ function Item({ icon, text, open, active, onClick }) {
 function MiniItem({ text }) {
   return <div className="text-sm text-gray-600 hover:text-black cursor-pointer">{text}</div>;
 }
+ 

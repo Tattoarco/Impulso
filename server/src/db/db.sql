@@ -20,6 +20,21 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TIMESTAMP DEFAULT NOW()
 );
 
+
+-- Ejecutar en pgAdmin → Query Tool sobre impulso_db
+-- Agrega campos de perfil a la tabla users
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS bio          TEXT,
+  ADD COLUMN IF NOT EXISTS universidad  VARCHAR(200),
+  ADD COLUMN IF NOT EXISTS carrera      VARCHAR(200),
+  ADD COLUMN IF NOT EXISTS año_graduacion INTEGER,
+  ADD COLUMN IF NOT EXISTS habilidades  JSONB DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS linkedin     VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS portafolio   VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS ciudad       VARCHAR(100);
+
+
 -- ── Empresas (extiende users con rol 'empresa') ──────
 CREATE TABLE IF NOT EXISTS companies (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
