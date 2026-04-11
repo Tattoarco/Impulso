@@ -10,6 +10,8 @@ import Timeline from "./Pages/Timeline";
 import ProyectoDetalle from "./Pages/ProyectoDetalle";
 import Postulantes from "./Pages/Postulantes";
 import EditarPerfil from "./Pages/EditarPerfil";
+import Dashboard from "./Pages/Dashboard";
+import MisPostulaciones from "./Pages/Mispostulaciones";
 
 function App() {
   return (
@@ -44,6 +46,24 @@ function App() {
           </PrivateRoute>
         }
       />
+
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/candidato"
+        element={
+          <PrivateRoute role="candidato">
+            <MisPostulaciones />
+          </PrivateRoute>
+        }
+      />
+
       {/* Rutas por rol */}
       <Route path="/empresa/crear-proyecto" element={<CrearProyecto />} />
 
