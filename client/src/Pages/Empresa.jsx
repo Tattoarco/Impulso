@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
 import StatsCards from "../Components/StatsCards";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 const STATUS = {
   published: { label: "Activo", dot: "bg-green-400", pill: "bg-green-50 text-green-600 border border-green-200" },

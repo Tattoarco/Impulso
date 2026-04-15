@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 /* ─── Icons ─── */
 const CheckIcon = () => (
