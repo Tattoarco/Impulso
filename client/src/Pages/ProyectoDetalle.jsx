@@ -72,11 +72,13 @@ export default function ProyectoDetalle() {
   const [applicationId, setApplicationId] = useState(null);
   const [toast, setToast]           = useState(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
   /* ── Cargar proyecto ── */
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`/api/jobs/${id}`);
+        const res = await fetch(`${API}/api/jobs/${id}`);
         if (!res.ok) throw new Error("Proyecto no encontrado.");
         const data = await res.json();
         setJob(data.job);
@@ -88,7 +90,7 @@ export default function ProyectoDetalle() {
       }
     };
     fetchJob();
-  }, [id]);
+  }, [id, API]);
 
   /* ── Verificar si ya se postuló ── */
   useEffect(() => {
@@ -110,7 +112,7 @@ export default function ProyectoDetalle() {
       }
     };
     checkApplication();
-  }, [id, isCandidate]);
+  }, [id, isCandidate, API]);
 
   /* ── Postularse ── */
   const handleApply = async () => {
@@ -120,7 +122,7 @@ export default function ProyectoDetalle() {
     }
     setApplying(true);
     try {
-      const res = await fetch("/api/applications", {
+      const res = await fetch(`${API}/api/applications`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

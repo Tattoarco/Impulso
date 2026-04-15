@@ -78,7 +78,7 @@ function StepCard({ step, index, onSubmit, submitting }) {
   return (
     <div className="relative flex gap-5 group">
       <div className="flex flex-col items-center">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 z-10 transition-all
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-all
           ${isDone    ? "bg-green-500 text-white shadow-[0_0_0_4px_#dcfce7]" : ""}
           ${isCurrent ? "bg-[#F26419] text-white shadow-[0_0_0_4px_#fef0e8] animate-pulse" : ""}
           ${isLocked  ? "bg-gray-200 text-gray-400" : ""}`}>
@@ -213,9 +213,11 @@ export default function Timeline() {
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast]           = useState(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
   const fetchSteps = async () => {
     try {
-      const res = await fetch(`/api/submissions/${applicationId}`, {
+      const res = await fetch(`${API}/api/submissions/${applicationId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Error al cargar el timeline."); }
@@ -235,7 +237,7 @@ export default function Timeline() {
   const handleSubmit = async (stepId, answerText) => {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/submissions", {
+      const res = await fetch(`${API}/api/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ application_id: applicationId, step_id: stepId, answer_text: answerText }),
