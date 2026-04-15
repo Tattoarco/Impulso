@@ -7,7 +7,7 @@ const app = express();
 // ── Middlewares ──────────────────────────────────────
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://impulso  .vercel.app"], // puerto de React + Vite
+    origin: ["http://localhost:5173", "https://impulso.vercel.app"], // puerto de React + Vite
     credentials: true,
   }),
 );
