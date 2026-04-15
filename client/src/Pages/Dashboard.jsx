@@ -27,6 +27,7 @@ function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
   const initials = job.title?.slice(0, 2).toUpperCase() || "PR";
   const color = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
   const hasApplied = appliedIds.includes(job.id);
+  
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all overflow-hidden">
@@ -164,6 +165,9 @@ export default function Dashboard() {
 
   const hora = new Date().getHours();
   const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+
+
+  
 
   return (
     <>
