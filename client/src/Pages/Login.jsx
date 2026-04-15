@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Input, Checkbox, Label } from "@heroui/react";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 
 export default function Login() {
   const navigate = useNavigate();

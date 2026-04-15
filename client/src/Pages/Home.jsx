@@ -1,8 +1,8 @@
 import { Button, Chip } from "@heroui/react";
 
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
-import ProjectCard from "../components/Card";
+import ProjectCard from "../Components/Card";
 
 export default function Home() {
   return (

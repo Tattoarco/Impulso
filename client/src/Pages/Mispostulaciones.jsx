@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 const APP_STATUS = {
   pending:  { label: "Pendiente",  pill: "bg-amber-50 text-amber-600 border border-amber-200",  icon: "fi-rr-clock"        },
