@@ -29,7 +29,7 @@ const UserIcon = () => (
 );
 
 /* ─── Datos ─── */
-const AREAS = ["Marketing y Comunicación", "Diseño Gráfico / UX", "Desarrollo de Software", "Administración", "Derecho", "Ingeniería", "Psicología", "Contabilidad / Finanzas", "Educación", "Otro"];
+const AREAS = ["Marketing y Comunicación", "Diseño Gráfico / UX", "Desarrollo de Software", "Administración", "Derecho", "Ingeniería", "Psicología", "Contabilidad / Finanzas", "Educación","Salud", "Otro"];
 const LEVELS = ["Explorador", "Practicante", "Junior Validado"];
 const DURATIONS = ["1 semana", "2 semanas", "3 semanas", "1 mes", "6 semanas", "2 meses"];
 
@@ -127,6 +127,8 @@ export default function CrearProyecto() {
   const [tipIdx] = useState(() => Math.floor(Math.random() * 3));
   const messagesEndRef = useRef(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, aiLoading]);
@@ -151,7 +153,7 @@ export default function CrearProyecto() {
     setStep(2);
     setAiLoading(true);
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -185,7 +187,7 @@ export default function CrearProyecto() {
         role: m.role === "ai" ? "assistant" : "user",
         content: m.content,
       }));
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -219,7 +221,7 @@ export default function CrearProyecto() {
   const generateBrief = async (history) => {
     setGenerating(true);
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -256,7 +258,7 @@ export default function CrearProyecto() {
       // Paso 1: Generar etapas del timeline con IA
       let steps = [];
       try {
-        const stepsRes = await fetch("/api/ai/chat", {
+        const stepsRes = await fetch(`${API}/api/ai/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -283,7 +285,7 @@ export default function CrearProyecto() {
       setPublishingMsg("Guardando proyecto...");
 
       // Paso 2: Guardar job + etapas en la BD
-      const res = await fetch("/api/jobs", {
+      const res = await fetch(`${API}/api/jobs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

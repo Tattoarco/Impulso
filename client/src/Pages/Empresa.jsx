@@ -114,12 +114,14 @@ export default function Empresa() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/jobs/mine", {
+        const res = await fetch(`${API}/api/jobs/mine`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
@@ -135,7 +137,7 @@ export default function Empresa() {
       }
     };
     if (token) fetchJobs();
-  }, [token]);
+  }, [token, API]);
 
   const filtered = filter === "all" ? jobs : jobs.filter((j) => j.status === filter);
 

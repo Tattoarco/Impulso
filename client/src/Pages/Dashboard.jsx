@@ -106,11 +106,13 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
   // Cargar todos los jobs publicados
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await fetch("/api/jobs", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${API}/api/jobs`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setJobs(data.jobs || []);
       } catch (err) {
@@ -120,14 +122,14 @@ export default function Dashboard() {
       }
     };
     if (token) fetchJobs();
-  }, [token]);
+  }, [token, API]);
 
   // Si es candidato, cargar sus postulaciones para marcar los que ya aplicó
   useEffect(() => {
     if (user?.role !== "candidato") return;
     const fetchApplied = async () => {
       try {
-        const res = await fetch("/api/applications/mine", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${API}/api/applications/mine`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setAppliedIds((data.applications || []).map((a) => a.job_id));
       } catch {
@@ -135,12 +137,12 @@ export default function Dashboard() {
       }
     };
     fetchApplied();
-  }, [token, user]);
+  }, [token, user, API]);
 
   const handleApply = async (jobId) => {
     setApplying(jobId);
     try {
-      const res = await fetch("/api/applications", {
+      const res = await fetch(`${API}/api/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ job_id: jobId }),
