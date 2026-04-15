@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 /* ── Status de postulación ── */
 const APP_STATUS = {
