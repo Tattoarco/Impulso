@@ -9,7 +9,7 @@ import CrearProyecto from "./Pages/CrearProyecto";
 import Timeline from "./Pages/Timeline";
 import ProyectoDetalle from "./Pages/ProyectoDetalle";
 import Postulantes from "./Pages/Postulantes";
-import EditarPerfil from "./Pages/EditarPerfil";
+import EditarPerfil from "./Pages/Editarperfil";
 import Dashboard from "./Pages/Dashboard";
 import MisPostulaciones from "./Pages/Mispostulaciones";
 
