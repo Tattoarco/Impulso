@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 import ProfileModal from "../Components/ProfileModal";
 import { Button } from "@heroui/react";
 

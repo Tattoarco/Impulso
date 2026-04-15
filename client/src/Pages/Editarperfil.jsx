@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 const HABILIDADES_SUGERIDAS = [
   "Figma", "Canva", "Adobe Illustrator", "Photoshop",

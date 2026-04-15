@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/Footer";
+import Footer from "../Components/footer";
 
 const STEP_STATUS = {
   done:    { label: "Completado",  pill: "bg-green-50 text-green-600 border-green-200",      dot: "bg-green-500"  },

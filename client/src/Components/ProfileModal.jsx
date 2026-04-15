@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ProfileModal({ candidate, onClose }) {
   if (!candidate) return null;
 
