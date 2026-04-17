@@ -120,6 +120,7 @@ function ProgressModal({ applicationId, candidateName, jobTitle, onClose, token 
   const [scores, setScores] = useState({});
   const [saving, setSaving] = useState(null);
   const [saved, setSaved] = useState({});
+  
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
