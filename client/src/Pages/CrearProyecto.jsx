@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
 import Footer from "../Components/footer";
+import Navbar from "../Components/Navbar";
 
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
@@ -288,7 +289,7 @@ export default function CrearProyecto() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
       {/* TOPBAR */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-[5%] h-15 flex items-center justify-between">
+      {/* <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-[5%] h-15 flex items-center justify-between">
         <a href="/empresa" className="flex items-center gap-2 no-underline cursor-pointer">
           <div className="w-7.5 h-7.5 bg-[#F26419] rounded-lg flex items-center justify-center">
             <i className="fi fi-sr-bolt text-white" />
@@ -299,6 +300,10 @@ export default function CrearProyecto() {
           <i className="fi fi-br-angle-small-left" />
           {step > 1 ? "Paso anterior" : "Volver al dashboard"}
         </Button>
+      </header> */}
+
+      <header>
+        <Navbar />
       </header>
 
       {/* STEPPER */}
