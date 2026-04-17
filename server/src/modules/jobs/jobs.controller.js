@@ -56,7 +56,7 @@ Responde SOLO con JSON válido:
 
 // ── Crear oferta y guardar en BD ──────────────────────────────
 async function createJob(req, res) {
-  const { title, summary, profile_area, duration, status, steps } = req.body;
+  const { title, summary, profile_area, duration, status, steps, modalidad, pago } = req.body;
   const userId = req.user.id;
 
   if (!title || !summary) {
@@ -78,10 +78,19 @@ async function createJob(req, res) {
 
     // Crear el job
     const jobResult = await pool.query(
-      `INSERT INTO jobs (company_id, title, summary, profile_area, duration, status)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO jobs (company_id, title, summary, profile_area, duration, status, modalidad, pago)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [companyId, title, summary, profile_area, duration, status || 'draft']
+      [
+        companyId,
+        title,
+        summary,
+        profile_area,
+        duration,
+        status || 'draft',
+        modalidad || 'remoto',
+        pago || null
+      ]
     );
 
     const job = jobResult.rows[0];
@@ -94,8 +103,12 @@ async function createJob(req, res) {
           `INSERT INTO job_steps (job_id, step_order, title, description, duration, tasks, criteria)
            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
-            job.id, i + 1, step.title, step.description,
-            step.duration, JSON.stringify(step.tasks || []),
+            job.id,
+            i + 1,
+            step.title,
+            step.description,
+            step.duration,
+            JSON.stringify(step.tasks || []),
             JSON.stringify(step.criteria || []),
           ]
         );
