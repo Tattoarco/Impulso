@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
+import Navbar from "../Components/Navbar";
 
 const CARD_COLORS = ["from-orange-400 to-rose-400", "from-violet-400 to-purple-500", "from-teal-400 to-cyan-500", "from-blue-400 to-indigo-500", "from-green-400 to-emerald-500"];
 
@@ -173,6 +174,7 @@ export default function Dashboard() {
 
   return (
     <>
+      <Navbar />
       <div className="flex min-h-screen bg-gray-50">
         <SideBar />
         <main className="ml-24 flex-1 p-8">

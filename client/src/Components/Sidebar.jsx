@@ -6,7 +6,7 @@ import { Button } from "@heroui/react";
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [open, setOpen] = useState(true);
 
   const roleLabel = { empresa: "Empresa", candidato: "Candidato" };
@@ -24,18 +24,14 @@ export default function Sidebar() {
       ? "Crear proyecto"
       : "Explorar proyectos";
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   return (
     <div
-      className={`fixed top-6 left-6 h-[92vh] z-40 transition-all duration-300 ${
+      className={`ml-6 mt-2 left-6 h-[92vh] transition-all duration-300 ${
         open ? "w-72" : "w-20"
       }`}
     >
-      <div className="h-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl flex flex-col justify-between p-4">
+      <div className="h-full bg-[#252B2B] text-white rounded-3xl shadow-xl flex flex-col justify-between p-4">
 
         {/* HEADER */}
         <div>
@@ -85,15 +81,6 @@ export default function Sidebar() {
               onClick={() => navigate(misProyectosRoute)}
             />
 
-            {user?.role === "candidato" && (
-              <Item
-                icon="fi fi-rr-user"
-                text="Mi perfil"
-                open={open}
-                active={location.pathname === "/candidato/perfil"}
-                onClick={() => navigate("/candidato/perfil")}
-              />
-            )}
 
             <Item
               icon="fi fi-rr-calendar"
@@ -118,35 +105,11 @@ export default function Sidebar() {
 
           </div>
 
-          {open && (
-            <div className="mt-6">
-              <p className="text-xs text-gray-400 mb-3">Servicios</p>
-              <div className="bg-gray-100 rounded-2xl p-3 space-y-2">
-                <MiniItem text="Slack" />
-                <MiniItem text="Intercom" />
-                <MiniItem text="Plugins" />
-              </div>
-            </div>
-          )}
+
         </div>
 
         {/* FOOTER */}
         <div className="space-y-2">
-          {open ? (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none bg-transparent"
-            >
-              <i className="fi fi-rr-sign-out text-base" /> Cerrar sesión
-            </button>
-          ) : (
-            <button
-              onClick={handleLogout}
-              className="w-full flex justify-center py-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer border-none bg-transparent"
-            >
-              <i className="fi fi-rr-sign-out text-base" />
-            </button>
-          )}
 
           {open ? (
             <Button

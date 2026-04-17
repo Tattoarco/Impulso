@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/Authcontext";
+import { useAuth } from "../Context/AuthContext";
 import SideBar from "../Components/Sidebar";
-import Footer from "../Components/footer";
-import ProfileModal from "../Components/ProfileModal";
-import { Button } from "@heroui/react";
+import Footer from "../Components/Footer";
 
 const APP_STATUS = {
   pending: { label: "Pendiente", pill: "bg-amber-50 text-amber-600 border-amber-200", icon: "fi-rr-clock" },
@@ -44,7 +42,13 @@ function Avatar({ name, color }) {
   return <div className={`w-10 h-10 rounded-full bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{initials}</div>;
 }
 
-function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, onViewProfile, updating }) {
+// ── PUNTO 2: empresa solo ve postulantes de sus propios jobs ──
+// Esto se garantiza porque la ruta /empresa/proyecto/:jobId/postulantes
+// solo es accesible desde las cards de Empresa.jsx (mis proyectos)
+// y el backend filtra por company_id del token.
+
+// ── PUNTO 3: rechazado es definitivo — se quita "reconsiderar" ──
+function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, updating }) {
   const st = APP_STATUS[applicant.status] || APP_STATUS.pending;
   const color = CARD_COLORS[index % CARD_COLORS.length];
   const steps = parseInt(applicant.steps_completed) || 0;
@@ -58,10 +62,6 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, 
           <p className="text-xs text-gray-400 truncate">{applicant.candidate_email}</p>
           <p className="text-xs text-gray-400 mt-0.5">Se postuló el {new Date(applicant.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}</p>
         </div>
-        <Button variant="outline" onClick={() => onViewProfile(applicant.candidate_id)} className="">
-          <i className="fi fi-rr-user text-[11px]" />
-          Perfil
-        </Button>
 
         {applicant.status === "approved" && (
           <div className="text-center px-3">
@@ -73,33 +73,39 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, 
             </p>
           </div>
         )}
+
         <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${st.pill}`}>
           <i className={`fi ${st.icon} text-[10px]`} />
           {st.label}
         </span>
+
         <div className="flex gap-2 flex-wrap">
           {applicant.status === "pending" && (
             <>
-              <Button onClick={() => onApprove(applicant.id)} disabled={updating === applicant.id} className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-green-600 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+              <button onClick={() => onApprove(applicant.id)} disabled={updating === applicant.id} className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-green-600 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                 <i className="fi fi-rr-check text-[11px]" />
                 {updating === applicant.id ? "..." : "Aprobar"}
-              </Button>
-              <Button onClick={() => onReject(applicant.id)} disabled={updating === applicant.id} className="flex items-center gap-1.5 px-4 py-2 bg-white text-red-500 border border-red-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              </button>
+              <button onClick={() => onReject(applicant.id)} disabled={updating === applicant.id} className="flex items-center gap-1.5 px-4 py-2 bg-white text-red-500 border border-red-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i className="fi fi-rr-cross text-[11px]" />
                 Rechazar
-              </Button>
+              </button>
             </>
           )}
+
           {applicant.status === "approved" && (
-            <Button onClick={() => onViewProgress(applicant.id, applicant.candidate_name)} className="flex items-center gap-1.5 px-4 py-2 bg-[#F26419] text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5">
+            <button onClick={() => onViewProgress(applicant.id, applicant.candidate_name)} className="flex items-center gap-1.5 px-4 py-2 bg-[#F26419] text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-[#C94E0D] hover:-translate-y-0.5">
               <i className="fi fi-rr-eye text-[11px]" />
               Ver entregas
-            </Button>
+            </button>
           )}
+
+          {/* PUNTO 3: rechazado es definitivo — sin botón de reconsiderar */}
           {applicant.status === "rejected" && (
-            <Button onClick={() => onApprove(applicant.id)} disabled={updating === applicant.id} className="flex items-center gap-1.5 px-4 py-2 bg-white text-gray-500 border border-gray-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-50">
-              Reconsiderar
-            </Button>
+            <span className="flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-400 text-xs font-semibold rounded-xl border border-red-100">
+              <i className="fi fi-rr-cross-circle text-[11px]" />
+              Rechazado definitivamente
+            </span>
           )}
         </div>
       </div>
@@ -114,14 +120,11 @@ function ProgressModal({ applicationId, candidateName, jobTitle, onClose, token 
   const [scores, setScores] = useState({});
   const [saving, setSaving] = useState(null);
   const [saved, setSaved] = useState({});
-  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        const res = await fetch(`${API}/api/submissions/${applicationId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(`/api/submissions/${applicationId}`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setSteps(data.steps || []);
         const fb = {};
@@ -132,20 +135,20 @@ function ProgressModal({ applicationId, candidateName, jobTitle, onClose, token 
         });
         setFeedbacks(fb);
         setScores(sc);
-      } catch {
-        console.error("Error fetching steps");
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchSteps();
-  }, [applicationId, token, API]);
+  }, [applicationId, token]);
 
   const handleSaveFeedback = async (submissionId) => {
     if (!feedbacks[submissionId]?.trim()) return;
     setSaving(submissionId);
     try {
-      const res = await fetch(`${API}/api/submissions/${submissionId}/feedback`, {
+      const res = await fetch(`/api/submissions/${submissionId}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ feedback_text: feedbacks[submissionId], score: scores[submissionId] || null }),
@@ -278,36 +281,14 @@ export default function Postulantes() {
   const [modal, setModal] = useState(null);
   const [toast, setToast] = useState(null);
 
-  const [profileModal, setProfileModal] = useState(null);
-
-  const API = import.meta.env.VITE_API_URL;
-
-  const openProfile = async (candidateId) => {
-    try {
-      const res = await fetch(`${API}/api/auth/candidato/${candidateId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      setProfileModal(data.candidate);
-    } catch {
-      showToast("error", "No se pudo cargar el perfil");
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const jobRes = await fetch(`${API}/api/jobs/${jobId}`);
+        const jobRes = await fetch(`/api/jobs/${jobId}`);
         if (!jobRes.ok) throw new Error("Proyecto no encontrado.");
         const jobData = await jobRes.json();
         setJob(jobData.job);
-
-        const appRes = await fetch(`${API}/api/applications?job_id=${jobId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const appRes = await fetch(`/api/applications?job_id=${jobId}`, { headers: { Authorization: `Bearer ${token}` } });
         if (!appRes.ok) throw new Error("Error al cargar postulantes.");
         const appData = await appRes.json();
         setApplicants(appData.applicants || []);
@@ -318,12 +299,12 @@ export default function Postulantes() {
       }
     };
     if (token) fetchData();
-  }, [jobId, token, API]);
+  }, [jobId, token]);
 
   const updateStatus = async (applicationId, status) => {
     setUpdating(applicationId);
     try {
-      const res = await fetch(`${API}/api/applications/${applicationId}/status`, {
+      const res = await fetch(`/api/applications/${applicationId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
@@ -345,12 +326,7 @@ export default function Postulantes() {
   };
 
   const filtered = filter === "all" ? applicants : applicants.filter((a) => a.status === filter);
-  const counts = {
-    all: applicants.length,
-    pending: applicants.filter((a) => a.status === "pending").length,
-    approved: applicants.filter((a) => a.status === "approved").length,
-    rejected: applicants.filter((a) => a.status === "rejected").length,
-  };
+  const counts = { all: applicants.length, pending: applicants.filter((a) => a.status === "pending").length, approved: applicants.filter((a) => a.status === "approved").length, rejected: applicants.filter((a) => a.status === "rejected").length };
   const filterTabs = [
     { key: "all", label: "Todos" },
     { key: "pending", label: "Pendientes" },
@@ -420,7 +396,7 @@ export default function Postulantes() {
               {!loading && filtered.length > 0 && (
                 <div className="space-y-3">
                   {filtered.map((applicant, i) => (
-                    <ApplicantCard key={applicant.id} applicant={applicant} index={i} updating={updating} onApprove={(id) => updateStatus(id, "approved")} onReject={(id) => updateStatus(id, "rejected")} onViewProgress={(id, name) => setModal({ applicationId: id, candidateName: name })} onViewProfile={openProfile} />
+                    <ApplicantCard key={applicant.id} applicant={applicant} index={i} updating={updating} onApprove={(id) => updateStatus(id, "approved")} onReject={(id) => updateStatus(id, "rejected")} onViewProgress={(id, name) => setModal({ applicationId: id, candidateName: name })} />
                   ))}
                 </div>
               )}
@@ -430,13 +406,12 @@ export default function Postulantes() {
       </div>
       <Footer />
       {modal && <ProgressModal applicationId={modal.applicationId} candidateName={modal.candidateName} jobTitle={job?.title || ""} token={token} onClose={() => setModal(null)} />}
-      {profileModal && <ProfileModal candidate={profileModal} onClose={() => setProfileModal(null)} />}
       {toast && (
         <div className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-50 animate-[slideUp_0.3s_ease] ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
-      <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);}}`}</style>
+      <style>{`@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
     </>
   );
 }
