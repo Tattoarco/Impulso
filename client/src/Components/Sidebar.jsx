@@ -7,7 +7,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false  );
 
   const roleLabel = { empresa: "Empresa", candidato: "Candidato" };
 
@@ -27,9 +27,9 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`fixed z-40 left-6 h-[92vh] transition-all duration-300 ${
-        open ? "w-72" : "w-20"
-      }`}
+       className={`sticky top-6 self-start h-[calc(100vh-3rem)] transition-all duration-300 ${
+    open ? "w-72" : "w-20"
+  }`} 
     >
       <div className="h-full bg-[#252B2B] text-white rounded-3xl shadow-xl flex flex-col justify-between p-4">
 
@@ -136,15 +136,15 @@ function Item({ icon, text, open, active, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition
+      className={`flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer transition-all duration-200
         ${
           active
-            ? "bg-orange-500 text-white shadow-sm"
-            : "text-gray-600 hover:bg-gray-100"
+            ? "bg-orange-500 text-white shadow-md"
+            : "text-gray-300 hover:bg-white/10 hover:text-white"
         }`}
     >
       <i className={`${icon} text-lg`} />
-      {open && <span className="text-sm">{text}</span>}
+      {open && <span className="text-sm font-medium">{text}</span>}
     </div>
   );
 }
