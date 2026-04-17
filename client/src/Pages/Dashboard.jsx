@@ -28,7 +28,6 @@ function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
   const initials = job.title?.slice(0, 2).toUpperCase() || "PR";
   const color = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
   const hasApplied = appliedIds.includes(job.id);
-  
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all overflow-hidden">
@@ -169,81 +168,95 @@ export default function Dashboard() {
   const hora = new Date().getHours();
   const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
 
-
-  
-
   return (
     <>
-      <Navbar />
-      <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
-        <main className="ml-24 flex-1 p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <p className="text-sm text-gray-400">{saludo} 👋</p>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{user?.name || "Usuario"}</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{user?.role === "candidato" ? "Explora proyectos y empieza a ganar experiencia" : "Explora todos los proyectos activos en la plataforma"}</p>
-          </div>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        {/* NAVBAR */}
+        <div className="relative z-50">
+          <Navbar />
+        </div>
 
-          {/* Search */}
-          <div className="relative mb-6">
-            <i className="fi fi-rr-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por título, área o empresa..." className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm text-gray-900 outline-none focus:border-[#F26419] transition-all" />
-          </div>
+        {/* CONTENIDO */}
+        <div className="flex flex-1">
+          {/* SIDEBAR */}
+          <SideBar />
 
-          {/* Grid */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <i className="fi fi-rr-briefcase text-[#F26419]" />
-                Proyectos disponibles
-                {!loading && <span className="text-xs font-normal text-gray-400 ml-1">({filtered.length})</span>}
-              </h2>
+          {/* MAIN */}
+          <main className="flex-1 p-8 ml-24 pt-24">
+            {/* Header */}
+            <div className="mb-8">
+              <p className="text-sm text-gray-400">{saludo} 👋</p>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{user?.name || "Usuario"}</h1>
+              <p className="text-sm text-gray-400 mt-0.5">{user?.role === "candidato" ? "Explora proyectos y empieza a ganar experiencia" : "Explora todos los proyectos activos en la plataforma"}</p>
             </div>
 
-            {loading && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Skeleton key={i} />
-                ))}
-              </div>
-            )}
+            {/* Search */}
+            <div className="relative mb-6">
+              <i className="fi fi-rr-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por título, área o empresa..." className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm text-gray-900 outline-none focus:border-[#F26419] transition-all" />
+            </div>
 
-            {!loading && filtered.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <i className="fi fi-rr-search text-3xl text-gray-300 block mb-3" />
-                <p className="text-gray-500 font-medium text-sm mb-1">{search ? "Sin resultados para tu búsqueda" : "No hay proyectos disponibles aún"}</p>
-                {search && (
-                  <button onClick={() => setSearch("")} className="text-xs text-[#F26419] underline cursor-pointer bg-none border-none mt-1">
-                    Limpiar búsqueda
-                  </button>
-                )}
+            {/* Grid */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <i className="fi fi-rr-briefcase text-[#F26419]" />
+                  Proyectos disponibles
+                  {!loading && <span className="text-xs font-normal text-gray-400 ml-1">({filtered.length})</span>}
+                </h2>
               </div>
-            )}
 
-            {!loading && filtered.length > 0 && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filtered.map((job) => (
-                  <JobCard key={job.id} job={job} role={user?.role} navigate={navigate} appliedIds={appliedIds} onApply={handleApply} applying={applying} />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+              {loading && (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Skeleton key={i} />
+                  ))}
+                </div>
+              )}
+
+              {!loading && filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <i className="fi fi-rr-search text-3xl text-gray-300 block mb-3" />
+                  <p className="text-gray-500 font-medium text-sm mb-1">{search ? "Sin resultados para tu búsqueda" : "No hay proyectos disponibles aún"}</p>
+                  {search && (
+                    <button onClick={() => setSearch("")} className="text-xs text-[#F26419] underline cursor-pointer bg-none border-none mt-1">
+                      Limpiar búsqueda
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!loading && filtered.length > 0 && (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {filtered.map((job) => (
+                    <JobCard key={job.id} job={job} role={user?.role} navigate={navigate} appliedIds={appliedIds} onApply={handleApply} applying={applying} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+
+        <Footer />
+        {/* FOOTER */}
       </div>
 
-      <Footer />
-
+      {/* TOAST */}
       {toast && (
         <div
           className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-50 animate-[slideUp_0.3s_ease]
-          ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
+        ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
         >
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
 
-      <style>{`@keyframes slideUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }`}</style>
+      <style>{`
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
     </>
   );
 }

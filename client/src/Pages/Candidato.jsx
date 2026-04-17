@@ -105,40 +105,46 @@ export default function Candidato() {
 
   return (
     <>
-    <Navbar />
-      <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
-        <main className="ml-24 flex-1 p-8">
-          {/* HEADER */}
-          <div className="mb-8">
-            <p className="text-sm text-gray-400">{saludo} 👋</p>
-            <h1 className="text-2xl font-bold">{user?.name || "Candidato"}</h1>
-            <p className="text-sm text-gray-400">Explora proyectos y empieza a ganar experiencia</p>
-          </div>
+      <div className="min-h-screen flex bg-gray-50">
+        <div className="relative z-50">
+          <Navbar />
+        </div>
+        {/* CONTENIDO */}
+        <div className="flex flex-1">
+          {/* SIDEBAR */}
+          <SideBar />
+          <main className="flex-1 p-8 ml-24 pt-24">
+            {/* HEADER */}
+            <div className="mb-8">
+              <p className="text-sm text-gray-400">{saludo} 👋</p>
+              <h1 className="text-2xl font-bold">{user?.name || "Candidato"}</h1>
+              <p className="text-sm text-gray-400">Explora proyectos y empieza a ganar experiencia</p>
+            </div>
 
-          {/* LISTA */}
-          <div className="bg-white rounded-2xl p-6 border">
-            <h2 className="font-bold mb-4">Proyectos disponibles</h2>
+            {/* LISTA */}
+            <div className="bg-white rounded-2xl p-6 border">
+              <h2 className="font-bold mb-4">Proyectos disponibles</h2>
 
-            {loading && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} />
-                ))}
-              </div>
-            )}
+              {loading && (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} />
+                  ))}
+                </div>
+              )}
 
-            {!loading && jobs.length === 0 && <p className="text-gray-400 text-sm">No hay proyectos disponibles aún</p>}
+              {!loading && jobs.length === 0 && <p className="text-gray-400 text-sm">No hay proyectos disponibles aún</p>}
 
-            {!loading && jobs.length > 0 && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {jobs.map((job) => (
-                  <ProjectCard key={job.id} job={job} navigate={navigate} />
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+              {!loading && jobs.length > 0 && (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {jobs.map((job) => (
+                    <ProjectCard key={job.id} job={job} navigate={navigate} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
       <Footer />
     </>

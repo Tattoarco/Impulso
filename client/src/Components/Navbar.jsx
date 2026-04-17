@@ -32,7 +32,7 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="w-full h-16 flex items-center justify-between px-6 bg-[#252B2B] text-white border-b border-white/10">
+    <nav className="fixed z-50 w-full h-16 flex items-center justify-between px-6 bg-[#252B2B] text-white border-b border-white/10">
       {/* LOGO */}
       <div onClick={() => navigate("/")} className="font-bold text-lg cursor-pointer">
         Impulso
@@ -44,19 +44,18 @@ export default function Navbar() {
           {/* CANDIDATO */}
           {user.role === "candidato" && (
             <>
-              <Item text="Inicio" path="/candidato" isActive={isActive} navigate={navigate} />
+              <Item text="Inicio" path="/" isActive={isActive} navigate={navigate} />
               <Item text="Oportunidades" path="/dashboard" isActive={isActive} navigate={navigate} />
-              <Item text="Empresas" path="/empresas" isActive={isActive} navigate={navigate} />
-              <Item text="Mi portafolio" path="/candidato/perfil" isActive={isActive} navigate={navigate} />
+              <Item text="Empresas" path="/" isActive={isActive} navigate={navigate} />
             </>
           )}
 
           {/* EMPRESA */}
           {user.role === "empresa" && (
             <>
-              <Item text="Inicio" path="/empresa" isActive={isActive} navigate={navigate} />
+              <Item text="Inicio" path="/" isActive={isActive} navigate={navigate} />
               <Item text="Proyectos" path="/empresa" isActive={isActive} navigate={navigate} />
-              <Item text="Candidatos" path="/empresa/candidatos" isActive={isActive} navigate={navigate} />
+              <Item text="Perfiles" path="/empresa/perfiles" isActive={isActive} navigate={navigate} />
               <Item text="Crear" path="/empresa/crear-proyecto" isActive={isActive} navigate={navigate} />
             </>
           )}
@@ -78,8 +77,8 @@ export default function Navbar() {
         ) : (
           <>
             <Dropdown>
-              <Button aria-label="Menu" variant="ghost">
-                <i className="fi fi-rr-user-gear text-white text-2xl hover:text-orange-500"></i>
+              <Button aria-label="Menu" variant="ghost" className="text-2xl text-white hover:text-orange-500 ">
+                <i className="fi fi-rr-user-gear "></i>
               </Button>
 
               <Dropdown.Popover>
@@ -94,11 +93,31 @@ export default function Navbar() {
                     </div>
                   </Dropdown.Item>
 
+                  <Dropdown.Item id="portafolio" textValue="Portafolio">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${location.pathname === "/candidato/portafolio" ? "bg-orange-500" : "bg-gray-500"}`}>
+                        <i class="fi fi-rr-briefcase-blank text-white text-sm"></i>
+                      </div>
+                      <Label>Portafolio</Label>
+                    </div>
+                  </Dropdown.Item>
+
+                  <Dropdown.Item id="configuracion" textValue="Configuración">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${location.pathname === "/candidato/configuracion" ? "bg-orange-500" : "bg-gray-500"}`}>
+                        <i class="fi fi-rr-settings text-white text-sm"></i>
+                      </div>
+                      <Label>Configuración</Label>
+                    </div>
+                  </Dropdown.Item>
+
                   {/* LOGOUT */}
                   <Dropdown.Item id="cerrar-sesion" textValue="Cerrar sesión" variant="danger">
                     <div className="flex items-center gap-2 text-red-400">
-                      <i className="fi fi-rr-sign-out text-sm" />
-                      <Label>Cerrar sesión</Label>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${location.pathname === "/logout" ? "bg-red-500" : "bg-red-200"}`}>
+                      <i class="fi fi-rr-door-closed"></i>
+                      </div>
+                      <Label> Cerrar sesión</Label>
                     </div>
                   </Dropdown.Item>
                 </Dropdown.Menu>
