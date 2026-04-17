@@ -97,7 +97,7 @@ export default function ProyectoDetalle() {
     if (!isCandidate) return;
     const checkApplication = async () => {
       try {
-        const res = await fetch("/api/applications/mine", {
+        const res = await fetch(`${API}/api/applications/mine`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (!res.ok) return;

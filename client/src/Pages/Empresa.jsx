@@ -5,6 +5,7 @@ import { useAuth } from "../Context/Authcontext";
 import SideBar from "../Components/Sidebar";
 import StatsCards from "../Components/StatsCards";
 import Footer from "../Components/footer";
+import Navbar from "../Components/Navbar";
 
 const STATUS = {
   published: { label: "Activo", dot: "bg-green-400", pill: "bg-green-50 text-green-600 border border-green-200" },
@@ -153,6 +154,7 @@ export default function Empresa() {
 
   return (
     <>
+    <Navbar />
       <div className="flex min-h-screen bg-gray-50">
         <SideBar />
         <main className="ml-24 flex-1 p-8">

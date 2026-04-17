@@ -27,7 +27,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`ml-6 mt-2 left-6 h-[92vh] transition-all duration-300 ${
+      className={`fixed z-40 left-6 h-[92vh] transition-all duration-300 ${
         open ? "w-72" : "w-20"
       }`}
     >
