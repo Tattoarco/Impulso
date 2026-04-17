@@ -120,11 +120,14 @@ function ProgressModal({ applicationId, candidateName, jobTitle, onClose, token 
   const [scores, setScores] = useState({});
   const [saving, setSaving] = useState(null);
   const [saved, setSaved] = useState({});
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        const res = await fetch(`/api/submissions/${applicationId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${API}/api/submissions/${applicationId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await res.json();
         setSteps(data.steps || []);
         const fb = {};
@@ -142,13 +145,13 @@ function ProgressModal({ applicationId, candidateName, jobTitle, onClose, token 
       }
     };
     fetchSteps();
-  }, [applicationId, token]);
+  }, [applicationId, token, API]);
 
   const handleSaveFeedback = async (submissionId) => {
     if (!feedbacks[submissionId]?.trim()) return;
     setSaving(submissionId);
     try {
-      const res = await fetch(`/api/submissions/${submissionId}/feedback`, {
+      const res = await fetch(`${API}/api/submissions/${submissionId}/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ feedback_text: feedbacks[submissionId], score: scores[submissionId] || null }),
