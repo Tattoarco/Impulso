@@ -19,15 +19,19 @@ export default function Navbar() {
   const { user, logout } = useAuth();
 
   const handleAction = (key) => {
-    if (key === "mi-perfil") {
-      navigate("/candidato/perfil");
-    }
+  if (key === "mi-perfil") {
+    navigate("/candidato/perfil");
+  }
 
-    if (key === "cerrar-sesion") {
-      logout();
-      navigate("/login");
-    }
-  };
+  if (key === "portafolio") {
+    navigate("/portafolio"); // 👈 ESTO FALTABA
+  }
+
+  if (key === "cerrar-sesion") {
+    logout();
+    navigate("/login");
+  }
+};
 
   const isActive = (path) => location.pathname === path;
 
@@ -56,7 +60,6 @@ export default function Navbar() {
               <Item text="Inicio" path="/" isActive={isActive} navigate={navigate} />
               <Item text="Proyectos" path="/empresa" isActive={isActive} navigate={navigate} />
               <Item text="Perfiles" path="/empresa/perfiles" isActive={isActive} navigate={navigate} />
-              <Item text="Crear" path="/empresa/crear-proyecto" isActive={isActive} navigate={navigate} />
             </>
           )}
         </div>

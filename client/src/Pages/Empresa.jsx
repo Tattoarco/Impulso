@@ -157,7 +157,7 @@ export default function Empresa() {
     <Navbar />
       <div className="flex min-h-screen bg-gray-50">
         <SideBar />
-        <main className="ml-24 flex-1 p-8">
+        <main className="ml-24 mt-15 flex-1 p-8">
           {/* HEADER */}
           <div className="flex items-start justify-between mb-8">
             <div>

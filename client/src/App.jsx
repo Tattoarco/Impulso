@@ -12,6 +12,7 @@ import Postulantes from "./Pages/Postulantes";
 import EditarPerfil from "./Pages/Editarperfil";
 import Dashboard from "./Pages/Dashboard";
 import MisPostulaciones from "./Pages/Mispostulaciones";
+import Portfolio from "./Pages/Portafolio";
 
 function App() {
   return (
@@ -19,7 +20,6 @@ function App() {
       {/* Rutas públicas */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-
       {/* Rutas privadas */}
       <Route
         path="/candidato"
@@ -37,7 +37,6 @@ function App() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/candidato/perfil"
         element={
@@ -46,7 +45,6 @@ function App() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/dashboard"
         element={
@@ -56,17 +54,32 @@ function App() {
         }
       />
       <Route
-        path="/candidato"
+        path="/candidato/postulaciones"
         element={
           <PrivateRoute role="candidato">
             <MisPostulaciones />
           </PrivateRoute>
         }
       />
+      <Route
+        path="/portafolio"
+        element={
+          <PrivateRoute>
+            <Portfolio />
+          </PrivateRoute>
+        }
+      />
 
+      
       {/* Rutas por rol */}
-      <Route path="/empresa/crear-proyecto" element={<CrearProyecto />} />
-
+      <Route
+        path="/empresa/crear-proyecto"
+        element={
+          <PrivateRoute role="empresa">
+            <CrearProyecto />
+          </PrivateRoute>
+        }
+      />{" "}
       <Route path="/candidato/timeline/:applicationId" element={<Timeline />} />
       <Route path="/proyecto/:id" element={<ProyectoDetalle />} />
       <Route path="/empresa/proyecto/:jobId/postulantes" element={<Postulantes />} />
