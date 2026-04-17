@@ -27,7 +27,7 @@ export default function Sidebar() {
 
   return (
     <div
-       className={`sticky top-6 self-start h-[calc(100vh-3rem)] transition-all duration-300 ${
+       className={`sticky left-2 top-6 self-start h-[calc(100vh-3rem)] transition-all duration-300 ${
     open ? "w-72" : "w-20"
   }`} 
     >
