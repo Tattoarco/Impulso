@@ -116,6 +116,9 @@ export default function CrearProyecto() {
   const [tipIdx] = useState(() => Math.floor(Math.random() * 3));
   const messagesEndRef = useRef(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, aiLoading]);
@@ -139,7 +142,7 @@ export default function CrearProyecto() {
     if (messages.length > 0) return;
     setAiLoading(true);
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: SYSTEM_PROMPT(info), messages: [{ role: "user", content: "Hola, quiero crear un proyecto para Impulso." }] }),
@@ -164,7 +167,7 @@ export default function CrearProyecto() {
     setAiLoading(true);
     try {
       const apiMessages = newMessages.map((m) => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content }));
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: SYSTEM_PROMPT(info), messages: apiMessages }),
@@ -192,7 +195,7 @@ export default function CrearProyecto() {
   const generateBrief = async (history) => {
     setGenerating(true);
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API}/api/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages: [{ role: "user", content: BRIEF_PROMPT(info, history) }] }),
@@ -234,7 +237,7 @@ export default function CrearProyecto() {
       let steps = [];
       let totalDuration = "3 semanas";
       try {
-        const stepsRes = await fetch("/api/ai/chat", {
+        const stepsRes = await fetch(`${API}/api/ai/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 1500, messages: [{ role: "user", content: STEPS_PROMPT(info, brief) }] }),
@@ -254,7 +257,7 @@ export default function CrearProyecto() {
       }
 
       setPublishingMsg("Guardando proyecto...");
-      const res = await fetch("/api/jobs", {
+      const res = await fetch(`${API}/api/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title: info.title, summary: brief.summary, profile_area: info.area, duration: totalDuration, status, steps }),

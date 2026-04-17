@@ -286,14 +286,17 @@ export default function Postulantes() {
   const [modal, setModal] = useState(null);
   const [toast, setToast] = useState(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const jobRes = await fetch(`/api/jobs/${jobId}`);
+        const jobRes = await fetch(`${API}/api/jobs/${jobId}`);
         if (!jobRes.ok) throw new Error("Proyecto no encontrado.");
         const jobData = await jobRes.json();
         setJob(jobData.job);
-        const appRes = await fetch(`/api/applications?job_id=${jobId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const appRes = await fetch(`${API}/api/applications?job_id=${jobId}`, { headers: { Authorization: `Bearer ${token}` } });
         if (!appRes.ok) throw new Error("Error al cargar postulantes.");
         const appData = await appRes.json();
         setApplicants(appData.applicants || []);
@@ -304,12 +307,12 @@ export default function Postulantes() {
       }
     };
     if (token) fetchData();
-  }, [jobId, token]);
+  }, [jobId, token, API]);
 
   const updateStatus = async (applicationId, status) => {
     setUpdating(applicationId);
     try {
-      const res = await fetch(`/api/applications/${applicationId}/status`, {
+      const res = await fetch(`${API}/api/applications/${applicationId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status }),
