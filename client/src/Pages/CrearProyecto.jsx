@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
-import { useAuth } from "../Context/AuthContext";
-import Footer from "../Components/Footer";
+import { useAuth } from "../Context/Authcontext";
+import Footer from "../Components/footer";
 
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
