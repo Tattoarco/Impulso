@@ -13,6 +13,7 @@ const auth = require("../auth/auth.middleware");
 // 🔒 privados
 router.get("/me", auth, getMyPortfolio);
 router.post("/", auth, savePortfolio);
+router.get("/me/jobs", auth, getMyRealJobs);
 
 // 🔥 trabajos reales (CLAVE)
 router.get("/me/jobs", auth, getMyRealJobs);

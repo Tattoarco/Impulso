@@ -34,7 +34,7 @@ export default function Portfolio() {
     const fetchAll = async () => {
       try {
         const [portfolioRes, jobsRes] = await Promise.all([
-          fetch(`${API}/api/portfolio/me`, {
+          fetch(`${API}/api/portfolio/me/jobs`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${API}/api/applications/me`, {

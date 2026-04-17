@@ -17,6 +17,7 @@ app.use(express.json());
 app.use("/api/auth", require("./modules/auth/auth.routes"));
 app.use("/api/jobs", require("./modules/jobs/jobs.routes"));
 app.use("/api", require("./modules/submissions/submissions.routes"));
+app.use("/api/portfolio", requiere("./modules/portafolio/portfolio.routes"));
 app.use("/api/ai", require("./Routes/ai"));
 
 // ── Ruta de prueba ───────────────────────────────────
