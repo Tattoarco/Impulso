@@ -59,7 +59,7 @@ export default function Navbar() {
             <>
               <Item text="Inicio" path="/" isActive={isActive} navigate={navigate} />
               <Item text="Proyectos" path="/empresa" isActive={isActive} navigate={navigate} />
-              <Item text="Perfiles" path="/empresa/perfiles" isActive={isActive} navigate={navigate} />
+              <Item text="Perfiles" path="/portafolio/:id" isActive={isActive} navigate={navigate} />
             </>
           )}
         </div>
