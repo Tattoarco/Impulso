@@ -39,6 +39,8 @@ export default function Sidebar() {
 
             <Item icon="fi fi-rr-briefcase" text="Mis proyectos" open={open} active={location.pathname.startsWith(misProyectosRoute)} onClick={() => navigate(misProyectosRoute)} />
 
+            {user?.role === "candidato" && <Item icon="fi fi-rr-briefcase" text="Mi portafolio" open={open} onClick={() => navigate("/portafolio")} />}
+
             <Item icon="fi fi-rr-calendar" text="Calendario" open={open} active={location.pathname === "/calendario"} />
 
             <Item icon="fi fi-rr-envelope" text="Mensajes" open={open} active={location.pathname === "/mensajes"} />

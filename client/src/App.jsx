@@ -12,7 +12,7 @@ import Postulantes from "./Pages/Postulantes";
 import EditarPerfil from "./Pages/Editarperfil";
 import Dashboard from "./Pages/Dashboard";
 import MisPostulaciones from "./Pages/Mispostulaciones";
-import Portfolio from "./Pages/Portafolio";
+import Portfolio from "./Pages/Portfolio";
 
 function App() {
   return (
@@ -61,16 +61,26 @@ function App() {
           </PrivateRoute>
         }
       />
+
+
+      // Mi portafolio (candidato)
       <Route
         path="/portafolio"
+        element={
+          <PrivateRoute role="candidato">
+            <Portfolio />
+          </PrivateRoute>
+        }
+      />
+      // Portafolio público (cualquier usuario autenticado puede verlo)
+      <Route
+        path="/portafolio/:id"
         element={
           <PrivateRoute>
             <Portfolio />
           </PrivateRoute>
         }
       />
-
-      
       {/* Rutas por rol */}
       <Route
         path="/empresa/crear-proyecto"

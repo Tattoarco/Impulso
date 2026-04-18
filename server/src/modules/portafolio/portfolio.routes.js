@@ -1,24 +1,19 @@
 const express = require("express");
-const router = express.Router();
-
+const router  = express.Router();
 const {
   getMyPortfolio,
   savePortfolio,
   getPortfolioById,
   getMyRealJobs,
-} = require("../controllers/portfolio.controller");
+} = require("./portfolio.controller");
+const { verifyToken } = require("../auth/auth.middleware");
 
-const auth = require("../auth/auth.middleware");
+// Privadas
+router.get("/me",      verifyToken, getMyPortfolio);
+router.post("/",       verifyToken, savePortfolio);
+router.get("/me/jobs", verifyToken, getMyRealJobs);
 
-// 🔒 privados
-router.get("/me", auth, getMyPortfolio);
-router.post("/", auth, savePortfolio);
-router.get("/me/jobs", auth, getMyRealJobs);
-
-// 🔥 trabajos reales (CLAVE)
-router.get("/me/jobs", auth, getMyRealJobs);
-
-// 🌍 público
-router.get("/:id", auth, getPortfolioById);
+// Pública — debe ir al final porque /:id captura todo
+router.get("/:id", getPortfolioById);
 
 module.exports = router;

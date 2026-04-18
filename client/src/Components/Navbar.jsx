@@ -96,14 +96,6 @@ export default function Navbar() {
                     </div>
                   </Dropdown.Item>
 
-                  <Dropdown.Item id="portafolio" textValue="Portafolio">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${location.pathname === "/candidato/portafolio" ? "bg-orange-500" : "bg-gray-500"}`}>
-                        <i class="fi fi-rr-briefcase-blank text-white text-sm"></i>
-                      </div>
-                      <Label>Portafolio</Label>
-                    </div>
-                  </Dropdown.Item>
 
                   <Dropdown.Item id="configuracion" textValue="Configuración">
                     <div className="flex items-center gap-2">
