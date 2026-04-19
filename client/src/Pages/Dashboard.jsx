@@ -84,6 +84,12 @@ function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
             </button>
           )}
 
+          {role === "empresa" && (
+            <button onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-gray-200 text-gray-600 bg-white cursor-pointer hover:border-[#F26419] hover:text-[#F26419] transition-all">
+              <i className="fi fi-rr-users text-[10px]" /> Ver postulantes
+            </button>
+          )}
         </div>
       </div>
     </div>
