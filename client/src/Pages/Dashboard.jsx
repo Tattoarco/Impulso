@@ -112,7 +112,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const url = user?.role === "empresa" ? `${API}/api/jobs/mine` : `${API}/api/jobs`;
+        // const url = user?.role === "empresa" ? `${API}/api/jobs/mine` : `${API}/api/jobs`;
+        const url = `${API}/api/jobs`;
         const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setJobs(data.jobs || []);
