@@ -31,6 +31,7 @@ export default function EditarPerfil() {
   const [habilidadInput, setHabilidadInput] = useState("");
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState(null);
+   const API = import.meta.env.VITE_API_URL;
 
   // Cargar datos actuales del usuario
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function EditarPerfil() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("http://localhost:3000/api/auth/me/profile", {
+      const res = await fetch(`${API}/api/auth/me/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
