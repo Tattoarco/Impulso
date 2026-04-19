@@ -13,6 +13,7 @@ import EditarPerfil from "./Pages/Editarperfil";
 import Dashboard from "./Pages/Dashboard";
 import MisPostulaciones from "./Pages/Mispostulaciones";
 import Portfolio from "./Pages/Portfolio";
+import TalentoHub from "./Pages/TalentoHub";
 
 function App() {
   return (
