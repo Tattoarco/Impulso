@@ -263,16 +263,20 @@ export default function Postulantes() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        
         const jobRes = await fetch(`${API}/api/jobs/${jobId}`);
         if (!jobRes.ok) throw new Error("Proyecto no encontrado.");
         const jobData = await jobRes.json();
         setJob(jobData.job);
-
+        
         const appRes = await fetch(`${API}/api/applications?job_id=${jobId}`, {
           headers: { Authorization: `Bearer ${token}` },
+          
         });
         if (!appRes.ok) throw new Error("Error al cargar postulantes.");
         const appData = await appRes.json();
+        console.log("APPLICANTS:", JSON.stringify(appData.applicants, null, 2)); // ← agrega esta línea
+
         setApplicants(appData.applicants || []);
       } catch (err) {
         setError(err.message);
