@@ -22,13 +22,12 @@ export default function ProfileModal({ candidate, onClose }) {
         <div className="bg-[#1C1712] px-6 py-5 flex justify-between items-start">
           <div>
             <h2 className="text-white text-xl font-bold">
-              {candidate.name}
+              {candidate.candidate_name || candidate.name}
             </h2>
             <p className="text-white/40 text-sm">
-              {candidate.email}
+              {candidate.candidate_email || candidate.email}
             </p>
           </div>
-
           <button
             onClick={onClose}
             className="text-white/40 hover:text-white"
@@ -101,14 +100,13 @@ export default function ProfileModal({ candidate, onClose }) {
           )}
 
           {/* Links */}
-          {(candidate.portafolio ) && (
+          {candidate.portafolio && (
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase mb-2">
                 Links
               </p>
-
               <div className="flex flex-col gap-2">
-                {/* {candidate.linkedin && (
+                {candidate.linkedin && (
                   <a
                     href={candidate.linkedin}
                     target="_blank"
@@ -117,8 +115,7 @@ export default function ProfileModal({ candidate, onClose }) {
                   >
                     LinkedIn
                   </a>
-                )} */}
-
+                )}
                 {candidate.portafolio && (
                   <a
                     href={candidate.portafolio}
@@ -130,6 +127,17 @@ export default function ProfileModal({ candidate, onClose }) {
                   </a>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Mensaje si no hay datos de perfil */}
+          {!candidate.bio && !candidate.universidad && !candidate.carrera &&
+           !candidate.ciudad && habilidades.length === 0 && !candidate.portafolio && (
+            <div className="text-center py-8">
+              <i className="fi fi-rr-user text-3xl text-gray-200 block mb-3" />
+              <p className="text-sm text-gray-400">
+                Este candidato aún no ha completado su perfil.
+              </p>
             </div>
           )}
         </div>

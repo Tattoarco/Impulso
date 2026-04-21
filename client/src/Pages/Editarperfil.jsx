@@ -129,7 +129,7 @@ export default function EditarPerfil() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Mi perfil</h1>
                 <p className="text-sm text-gray-400 mt-0.5">
-                  Completa tu perfil para que las empresas conozcan tu potencial
+                  Crea tu hoja de vida y destaca ante las empresas
                 </p>
                 {/* Barra de completitud */}
                 <div className="flex items-center gap-2 mt-2">
