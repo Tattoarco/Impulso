@@ -63,7 +63,7 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, 
 
         <div className="flex-1 min-w-0">
           {/* Nombre clickeable también */}
-          <button onClick={() => onViewProfile(applicant.candidate_id, applicant.candidate_name)} className="font-semibold text-gray-900 text-sm truncate cursor-pointer bg-none border-none p-0 hover:text-[#F26419] transition-colors text-left">
+          <button onClick={() => onViewProfile(applicant)} className="font-semibold text-gray-900 text-sm truncate cursor-pointer bg-none border-none p-0 hover:text-[#F26419] transition-colors text-left">
             {applicant.candidate_name}
           </button>
           <p className="text-xs text-gray-400 truncate">{applicant.candidate_email}</p>
@@ -86,7 +86,7 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, 
 
         <div className="flex gap-2 flex-wrap">
           {/* Ver perfil */}
-          <button onClick={() => onViewProfile(applicant.candidate_id, applicant.candidate_name)} className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:border-[#F26419] hover:text-[#F26419]">
+          <button onClick={() => onViewProfile(applicant)} className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200 text-xs font-semibold rounded-xl cursor-pointer transition-all hover:border-[#F26419] hover:text-[#F26419]">
             <i className="fi fi-rr-user text-[11px]" /> Perfil
           </button>
 
@@ -385,7 +385,7 @@ export default function Postulantes() {
 
       <Footer />
 
-      {modal?.type === "profile" && <ProfileModal candidateId={modal.candidateId} candidateName={modal.candidateName} token={token} onClose={() => setModal(null)} navigate={navigate} />}
+      {modal?.type === "profile" && <ProfileModal candidate={modal.candidate} token={token} onClose={() => setModal(null)} />}
 
       {modal?.type === "progress" && <ProgressModal applicationId={modal.applicationId} candidateName={modal.candidateName} jobTitle={job?.title || ""} token={token} onClose={() => setModal(null)} />}
 
