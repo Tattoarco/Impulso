@@ -10,7 +10,6 @@ async function applyToJob(req, res) {
   }
 
   try {
-    // Verificar que el job existe y está publicado
     const jobResult = await pool.query(`SELECT id, status FROM jobs WHERE id = $1`, [job_id]);
 
     if (jobResult.rows.length === 0) {
@@ -20,14 +19,12 @@ async function applyToJob(req, res) {
       return res.status(400).json({ error: "Este proyecto no está disponible." });
     }
 
-    // Verificar que no se haya postulado antes
     const existing = await pool.query(`SELECT id FROM applications WHERE job_id = $1 AND candidate_id = $2`, [job_id, candidateId]);
 
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: "Ya te postulaste a este proyecto." });
     }
 
-    // Crear la postulación
     const result = await pool.query(
       `INSERT INTO applications (job_id, candidate_id, status)
        VALUES ($1, $2, 'pending')
@@ -55,7 +52,6 @@ async function getApplicants(req, res) {
   }
 
   try {
-    // Verificar que el job pertenece a la empresa
     const ownerCheck = await pool.query(
       `SELECT j.id FROM jobs j
        JOIN companies c ON c.id = j.company_id
@@ -68,17 +64,42 @@ async function getApplicants(req, res) {
     }
 
     const result = await pool.query(
-      `SELECT 
-         a.id, a.status, a.created_at,
-         u.id AS candidate_id,
-         u.name AS candidate_name,
-         u.email AS candidate_email,
-         COUNT(s.id) AS steps_completed
+      `SELECT
+         a.id,
+         a.status,
+         a.created_at,
+
+         -- Identificación del candidato
+         u.id              AS candidate_id,
+         u.name            AS candidate_name,
+         u.email           AS candidate_email,
+
+         -- Campos del perfil (hoja de vida)
+         u.bio,
+         u.universidad,
+         u.carrera,
+         u.año_graduacion,
+         u.habilidades,
+         u.linkedin,
+         u.portafolio,
+         u.ciudad,
+         u.nivel_impulso,
+         u.puntos_totales,
+
+         -- Progreso en el proyecto
+         COUNT(s.id)                                             AS steps_completed,
+         (SELECT COUNT(*) FROM job_steps WHERE job_id = $1)     AS total_steps
+
        FROM applications a
        JOIN users u ON u.id = a.candidate_id
        LEFT JOIN submissions s ON s.application_id = a.id
        WHERE a.job_id = $1
-       GROUP BY a.id, u.id, u.name, u.email
+       GROUP BY
+         a.id,
+         u.id, u.name, u.email,
+         u.bio, u.universidad, u.carrera, u.año_graduacion,
+         u.habilidades, u.linkedin, u.portafolio, u.ciudad,
+         u.nivel_impulso, u.puntos_totales
        ORDER BY a.created_at DESC`,
       [job_id],
     );
@@ -131,7 +152,6 @@ async function updateApplicationStatus(req, res) {
   }
 
   try {
-    // Verificar que la empresa es dueña del job de esta postulación
     const ownerCheck = await pool.query(
       `SELECT a.id FROM applications a
        JOIN jobs j ON j.id = a.job_id
@@ -160,7 +180,6 @@ async function updateApplicationStatus(req, res) {
 //  SUBMISSIONS — Entregas por etapa
 // ══════════════════════════════════════════════
 
-// Candidato envía su respuesta para una etapa
 async function submitStep(req, res) {
   const { application_id, step_id, answer_text } = req.body;
   const candidateId = req.user.id;
@@ -170,7 +189,6 @@ async function submitStep(req, res) {
   }
 
   try {
-    // Verificar que la postulación pertenece al candidato y está aprobada
     const appCheck = await pool.query(
       `SELECT a.id, a.status FROM applications a
        WHERE a.id = $1 AND a.candidate_id = $2`,
@@ -184,14 +202,12 @@ async function submitStep(req, res) {
       return res.status(403).json({ error: "Tu postulación aún no ha sido aprobada." });
     }
 
-    // Verificar que no haya enviado esta etapa antes
     const existing = await pool.query(`SELECT id FROM submissions WHERE application_id = $1 AND step_id = $2`, [application_id, step_id]);
 
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: "Ya enviaste una respuesta para esta etapa." });
     }
 
-    // Verificar que la etapa anterior está completada (orden secuencial)
     const stepOrder = await pool.query(`SELECT step_order, job_id FROM job_steps WHERE id = $1`, [step_id]);
 
     if (stepOrder.rows.length === 0) {
@@ -220,7 +236,6 @@ async function submitStep(req, res) {
       }
     }
 
-    // Guardar la entrega
     const result = await pool.query(
       `INSERT INTO submissions (application_id, step_id, answer_text)
        VALUES ($1, $2, $3)
@@ -238,14 +253,11 @@ async function submitStep(req, res) {
   }
 }
 
-// Obtener todas las entregas de una postulación
-// Usado tanto por la empresa (para revisar) como por el candidato (para ver su progreso)
 async function getSubmissions(req, res) {
   const { application_id } = req.params;
   const userId = req.user.id;
 
   try {
-    // Verificar que el usuario tiene acceso (es el candidato o la empresa del job)
     const accessCheck = await pool.query(
       `SELECT a.id FROM applications a
        JOIN jobs j ON j.id = a.job_id
@@ -259,7 +271,6 @@ async function getSubmissions(req, res) {
       return res.status(403).json({ error: "No tienes acceso a estas entregas." });
     }
 
-    // Obtener todas las etapas del job con sus entregas (si las hay)
     const result = await pool.query(
       `SELECT 
          js.id AS step_id,
@@ -296,7 +307,6 @@ async function getSubmissions(req, res) {
 //  FEEDBACKS — Feedback de la empresa por etapa
 // ══════════════════════════════════════════════
 
-// Empresa da feedback a una entrega específica
 async function giveFeedback(req, res) {
   const { submission_id } = req.params;
   const { feedback_text, score } = req.body;
@@ -310,7 +320,6 @@ async function giveFeedback(req, res) {
   }
 
   try {
-    // Verificar que la empresa es dueña del job de esta entrega
     const ownerCheck = await pool.query(
       `SELECT s.id, c.id AS company_id FROM submissions s
        JOIN applications a ON a.id = s.application_id
@@ -324,11 +333,9 @@ async function giveFeedback(req, res) {
       return res.status(403).json({ error: "No tienes permisos para dar feedback aquí." });
     }
 
-    // Verificar que no haya feedback previo
     const existing = await pool.query(`SELECT id FROM feedbacks WHERE submission_id = $1`, [submission_id]);
 
     if (existing.rows.length > 0) {
-      // Actualizar el feedback existente
       const updated = await pool.query(
         `UPDATE feedbacks SET feedback_text = $1, score = $2
          WHERE submission_id = $3
@@ -338,7 +345,6 @@ async function giveFeedback(req, res) {
       return res.json({ message: "Feedback actualizado.", feedback: updated.rows[0] });
     }
 
-    // Crear nuevo feedback
     const result = await pool.query(
       `INSERT INTO feedbacks (submission_id, company_id, feedback_text, score)
        VALUES ($1, $2, $3, $4)

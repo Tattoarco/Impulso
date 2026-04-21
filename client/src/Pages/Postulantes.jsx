@@ -58,7 +58,6 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, 
       <div className="flex items-center gap-4 flex-wrap">
         {/* Avatar — clickeable para ver perfil */}
         <button onClick={() => onViewProfile(applicant)} className="cursor-pointer bg-transparent border-none p-0" title="Ver perfil">
-          console.log(applicant)
           <Avatar name={applicant.candidate_name} color={color} />
         </button>
 
