@@ -101,14 +101,14 @@ export default function ProfileModal({ candidate, onClose }) {
           )}
 
           {/* Links */}
-          {(candidate.linkedin || candidate.portafolio) && (
+          {(candidate.portafolio ) && (
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase mb-2">
                 Links
               </p>
 
               <div className="flex flex-col gap-2">
-                {candidate.linkedin && (
+                {/* {candidate.linkedin && (
                   <a
                     href={candidate.linkedin}
                     target="_blank"
@@ -117,7 +117,7 @@ export default function ProfileModal({ candidate, onClose }) {
                   >
                     LinkedIn
                   </a>
-                )}
+                )} */}
 
                 {candidate.portafolio && (
                   <a

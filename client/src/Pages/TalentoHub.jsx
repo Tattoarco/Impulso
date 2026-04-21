@@ -43,7 +43,7 @@ function CandidateCard({ candidate, navigate }) {
       <div className={`h-1.5 w-full ${nivelInfo.ring.replace("ring-", "bg-")}`} />
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
-          <div className={`w-12 h-12 rounded-xl ring-2 ${nivelInfo.ring} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
+          <div className={`w-12 h-12 rounded-xl ring-2 ${nivelInfo.ring} flex items-center justify-center text-white font-bold text-sm flex-link-0`}
             style={{ background: "linear-gradient(135deg, #F26419, #C94E0D)" }}>
             {candidate.name?.[0]?.toUpperCase() || "?"}
           </div>
