@@ -275,7 +275,6 @@ export default function Postulantes() {
         });
         if (!appRes.ok) throw new Error("Error al cargar postulantes.");
         const appData = await appRes.json();
-        console.log("APPLICANTS:", JSON.stringify(appData.applicants, null, 2)); // ← agrega esta línea
 
         setApplicants(appData.applicants || []);
       } catch (err) {
