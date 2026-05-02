@@ -42,7 +42,7 @@ function Avatar({ name, color }) {
       .join("")
       .slice(0, 2)
       .toUpperCase() || "??";
-  return <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{initials}</div>;
+  return <div className={`w-10 h-10 rounded-full bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{initials}</div>;
 }
 
 function ApplicantCard({ applicant, index, onApprove, onReject, onViewProgress, onFeedbackFinal, onViewProfile, updating }) {

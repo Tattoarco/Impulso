@@ -18,7 +18,7 @@ const NavItem = ({ text, path, isActive, navigate }) => {
       {/* Línea animada */}
       <span
         className={`
-          absolute left-0 -bottom-1 h-[2px] bg-orange-500 transition-all duration-300
+          absolute left-0 -bottom-1 h-0.5 bg-orange-500 transition-all duration-300
           ${active ? "w-full" : "w-0 group-hover:w-full"}
         `}
       />
@@ -133,7 +133,7 @@ export default function Navbar() {
                 </Button>
 
                 <span className="absolute -top-1 -right-1 bg-orange-500 text-[10px] 
-                  px-1.5 py-[2px] rounded-full text-white font-bold animate-pulse">
+                  px-1.5 py-0.5 rounded-full text-white font-bold animate-pulse">
                   3
                 </span>
               </div>

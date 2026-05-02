@@ -104,7 +104,7 @@ function CVPreview({ form }) {
   const isEmpty = !form.bio && !form.universidad && !form.carrera && habilidades.length === 0 && proyectos.length === 0;
 
   return (
-    <div id="cv-preview" className="bg-white font-sans text-gray-900 w-full min-h-[500px] shadow-xl rounded-2xl overflow-hidden">
+    <div id="cv-preview" className="bg-white font-sans text-gray-900 w-full min-h-125 shadow-xl rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-[#F26419] px-8 py-7 flex items-center gap-5">
         <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-black shrink-0">{initials}</div>
@@ -113,8 +113,8 @@ function CVPreview({ form }) {
           {form.carrera && <p className="text-white/80 text-sm font-medium mt-0.5">{form.carrera}</p>}
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
             {form.ciudad && <span className="text-white/70 text-xs">📍 {form.ciudad}</span>}
-            {form.linkedin && <span className="text-white/70 text-xs truncate max-w-[180px]">🔗 {form.linkedin.replace(/https?:\/\/(www\.)?/, "")}</span>}
-            {form.portafolio && <span className="text-white/70 text-xs truncate max-w-[180px]">🌐 {form.portafolio.replace(/https?:\/\/(www\.)?/, "")}</span>}
+            {form.linkedin && <span className="text-white/70 text-xs truncate max-w-45">🔗 {form.linkedin.replace(/https?:\/\/(www\.)?/, "")}</span>}
+            {form.portafolio && <span className="text-white/70 text-xs truncate max-w-45">🌐 {form.portafolio.replace(/https?:\/\/(www\.)?/, "")}</span>}
           </div>
         </div>
       </div>
@@ -361,7 +361,7 @@ export default function EditarPerfil() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-400 flex items-center justify-center text-white text-xl font-black shrink-0">{form.name?.[0]?.toUpperCase() || "?"}</div>
+                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-400 to-rose-400 flex items-center justify-center text-white text-xl font-black shrink-0">{form.name?.[0]?.toUpperCase() || "?"}</div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="text-xl font-bold text-gray-900 tracking-tight">Mi hoja de vida</h1>

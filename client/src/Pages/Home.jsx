@@ -196,7 +196,7 @@ export default function Home() {
             {[1, 2, 3].map((_, i) => (
               <motion.div key={i} whileHover={{ y: -6 }} className="rounded-3xl overflow-hidden border border-[#CCCCCC] bg-white">
                 {/* IMAGEN / MOCKUP */}
-                <div className="h-40 bg-gradient-to-br from-[#6651DD]/20 to-orange-400/20 flex items-center justify-center">
+                <div className="h-40 bg-linear-to-br from-[#6651DD]/20 to-orange-400/20 flex items-center justify-center">
                   <i className="fi fi-rr-picture text-3xl text-[#6651DD]" />
                 </div>
 

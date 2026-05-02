@@ -71,11 +71,11 @@ function MyProjectCard({ job, navigate }) {
 
   return (
     <div onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)} className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden flex flex-col">
-      <div className={`h-1.5 bg-gradient-to-r ${color} w-full`} />
+      <div className={`h-1.5 bg-linear-to-r ${color} w-full`} />
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md`}>{initials}</div>
+            <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md`}>{initials}</div>
             <div>
               <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-1 group-hover:text-[#F26419] transition-colors">{job.title}</h3>
               <p className="text-xs text-gray-400 mt-0.5">{new Date(job.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}</p>
@@ -113,10 +113,10 @@ function PublicJobCard({ job, navigate }) {
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all overflow-hidden">
-      <div className={`h-1.5 bg-gradient-to-r ${color}`} />
+      <div className={`h-1.5 bg-linear-to-r ${color}`} />
       <div className="p-4">
         <div className="flex items-start gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm`}>{initials}</div>
+          <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm`}>{initials}</div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-[#F26419] transition-colors">{job.title}</h3>
             <p className="text-xs text-gray-400">{job.company_name || "Empresa"}</p>
@@ -212,7 +212,7 @@ export default function Empresa() {
       }
     };
     fetch_();
-  }, [showExplore, token]);
+  }, [showExplore, token, allJobs.length]);
 
   const filtered = filter === "all" ? myJobs : myJobs.filter((j) => j.status === filter);
 
@@ -242,7 +242,7 @@ export default function Empresa() {
         <main className="mt-16 flex-1 px-8 py-8">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* ── Welcome Banner ─────────────────────────────────────── */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C1712] via-[#2a1f14] to-[#1C1712] p-7 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#1C1712] via-[#2a1f14] to-[#1C1712] p-7 shadow-2xl">
               <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-[#F26419]/15 blur-3xl pointer-events-none" />
               <div className="absolute -bottom-10 left-20 w-36 h-36 rounded-full bg-orange-400/8 blur-2xl pointer-events-none" />
 
@@ -341,7 +341,7 @@ export default function Empresa() {
                     <MyProjectCard key={job.id} job={job} navigate={navigate} />
                   ))}
                   {/* Card para crear nuevo */}
-                  <button onClick={() => navigate("/empresa/crear-proyecto")} className="border-2 border-dashed border-gray-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-[#F26419] hover:text-[#F26419] hover:bg-orange-50/30 transition-all cursor-pointer bg-transparent min-h-[180px] group">
+                  <button onClick={() => navigate("/empresa/crear-proyecto")} className="border-2 border-dashed border-gray-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-[#F26419] hover:text-[#F26419] hover:bg-orange-50/30 transition-all cursor-pointer bg-transparent min-h-45 group">
                     <div className="w-10 h-10 rounded-xl border-2 border-dashed border-current flex items-center justify-center group-hover:scale-110 transition-transform text-xl">+</div>
                     <span className="text-sm font-semibold">Nuevo proyecto</span>
                   </button>

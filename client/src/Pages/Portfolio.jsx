@@ -274,7 +274,7 @@ export default function Portfolio() {
       }
     };
     if (token || !isOwner) load();
-  }, [token, id]);
+  }, [token, id, isOwner, navigate, user]);
 
   const parse = (p) => ({
     ...p,
@@ -372,7 +372,7 @@ export default function Portfolio() {
                 <img
                   src={portfolio.avatar}
                   alt={portfolio.name}
-                  className="w-20 h-20 rounded-2xl border-4 border-white/30 object-cover flex-shrink-0"
+                  className="w-20 h-20 rounded-2xl border-4 border-white/30 object-cover shrink-0"
                   onError={(e) => {
                     e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(portfolio.name)}&background=ffffff&color=333`;
                   }}
