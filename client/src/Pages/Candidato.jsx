@@ -44,16 +44,6 @@ function ProjectCard({ job, navigate }) {
               e.stopPropagation();
               navigate(`/proyecto/${job.id}`);
             }}
-            variant="ghost"
-            className="text-xs text-[#F26419] cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition duration-200 hover:bg-orange-100"
-          >
-            Ver detalle
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/proyecto/${job.id}`);
-            }}
             className="bg-orange-500 text-white cursor-pointer hover:bg-orange-600 hover:shadow-md hover:-translate-y-0.5 transition duration-200"
           >
             Postular
@@ -110,7 +100,7 @@ export default function Candidato() {
         </div>
         {/* CONTENIDO */}
         <div className="flex flex-1">
-          <main className="flex-1 p-8 ml-24 pt-24">
+          <main className="flex-1 p-8 pt-24">
             {/* HEADER */}
             <div className="mb-8">
               <p className="text-sm text-gray-400">{saludo} 👋</p>

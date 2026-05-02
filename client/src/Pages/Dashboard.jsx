@@ -183,7 +183,7 @@ export default function Dashboard() {
           <Navbar />
         </div>
         <div className="flex flex-1">
-          <main className="flex-1 p-8 ml-24 pt-24">
+          <main className="flex-1 p-8 pt-24">
             <div className="mb-8">
               <p className="text-sm text-gray-400">{saludo} 👋</p>
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{user?.name || "Usuario"}</h1>
