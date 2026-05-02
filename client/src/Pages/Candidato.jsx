@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
 
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
 
@@ -111,8 +110,6 @@ export default function Candidato() {
         </div>
         {/* CONTENIDO */}
         <div className="flex flex-1">
-          {/* SIDEBAR */}
-          <SideBar />
           <main className="flex-1 p-8 ml-24 pt-24">
             {/* HEADER */}
             <div className="mb-8">

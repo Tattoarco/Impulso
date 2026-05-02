@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Navbar from "../Components/Navbar";
-import Sidebar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 
 const API = import.meta.env.VITE_API_URL;
@@ -121,7 +120,6 @@ export default function TalentoHub() {
     <>
       <Navbar />
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
         <main className="ml-24 pt-20 flex-1 p-8">
 
           {/* Header */}

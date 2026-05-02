@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
 
@@ -184,7 +183,6 @@ export default function Dashboard() {
           <Navbar />
         </div>
         <div className="flex flex-1">
-          <SideBar />
           <main className="flex-1 p-8 ml-24 pt-24">
             <div className="mb-8">
               <p className="text-sm text-gray-400">{saludo} 👋</p>

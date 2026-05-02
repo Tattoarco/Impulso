@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 
 /* ── Status de postulación ── */
@@ -155,7 +154,6 @@ export default function ProyectoDetalle() {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-8 max-w-4xl mx-auto">
           <Skeleton />
         </main>
@@ -166,7 +164,6 @@ export default function ProyectoDetalle() {
   if (error || !job) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-8 flex items-center justify-center">
           <div className="text-center">
             <i className="fi fi-rr-search text-4xl text-gray-300 block mb-4" />
@@ -188,7 +185,6 @@ export default function ProyectoDetalle() {
   return (
     <>
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
 
         <main className="ml-24 flex-1 p-8">
           <div className="max-w-4xl mx-auto">

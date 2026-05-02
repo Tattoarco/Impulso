@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import StatsCards from "../Components/StatsCards";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
@@ -156,7 +155,6 @@ export default function Empresa() {
     <>
     <Navbar />
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 mt-15 flex-1 p-8">
           {/* HEADER */}
           <div className="flex items-start justify-between mb-8">

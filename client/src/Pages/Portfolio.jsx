@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Navbar from "../Components/Navbar";
-import Sidebar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 import { NivelCard, NivelBadge } from "../Components/NivelBadge";
 
@@ -296,7 +295,6 @@ export default function Portfolio() {
     <>
       <Navbar />
       <div className="flex min-h-screen" style={{ background: pal.bg }}>
-        <Sidebar />
         <main className="flex-1 ml-24 pt-20 pb-16 px-8 max-w-5xl">
 
           {/* HERO */}

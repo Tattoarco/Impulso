@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 
 const STEP_STATUS = {
@@ -261,7 +260,6 @@ export default function Timeline() {
 
   if (loading) return (
     <div className="flex min-h-screen bg-gray-50">
-      <SideBar />
       <main className="ml-24 flex-1 p-8 max-w-3xl mx-auto">
         <div className="h-6 bg-gray-100 rounded w-48 mb-2 animate-pulse" />
         <div className="h-4 bg-gray-100 rounded w-72 mb-8 animate-pulse" />
@@ -272,7 +270,6 @@ export default function Timeline() {
 
   if (error) return (
     <div className="flex min-h-screen bg-gray-50">
-      <SideBar />
       <main className="ml-24 flex-1 p-8 flex items-center justify-center">
         <div className="text-center">
           <i className="fi fi-rr-shield-exclamation text-4xl text-gray-300 block mb-4" />
@@ -286,7 +283,6 @@ export default function Timeline() {
   return (
     <>
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-8">
           <div className="max-w-3xl mx-auto">
             <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 bg-none border-none cursor-pointer transition-colors">

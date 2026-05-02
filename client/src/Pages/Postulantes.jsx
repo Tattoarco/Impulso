@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 import ProfileModal from "../Components/ProfileModal";
 import FeedbackFinal from "../Components/FeedbackFinal";
@@ -332,7 +331,6 @@ export default function Postulantes() {
   return (
     <>
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-8">
           <div className="max-w-4xl mx-auto">
             <button onClick={() => navigate("/empresa")} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 bg-transparent border-none cursor-pointer transition-colors">

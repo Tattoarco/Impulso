@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 
 const APP_STATUS = {
@@ -143,7 +142,6 @@ export default function MisPostulaciones() {
   return (
     <>
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-8">
 
           <div className="mb-8">

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
-import SideBar from "../Components/Sidebar";
 import Footer from "../Components/footer";
 
 const API = import.meta.env.VITE_API_URL;
@@ -352,7 +351,6 @@ export default function EditarPerfil() {
       `}</style>
 
       <div className="flex min-h-screen bg-gray-50">
-        <SideBar />
         <main className="ml-24 flex-1 p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Back */}
