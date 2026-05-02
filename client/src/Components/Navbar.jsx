@@ -111,7 +111,7 @@
                     <Dropdown.Item id="cerrar-sesion" textValue="Cerrar sesión" variant="danger">
                       <div className="flex items-center gap-2 text-red-500">
                         <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                          <i className="fi fi-rr-sign-out text-red-500 text-sm" />
+                          <i className="fi fi-sr-sign-out text-red-500 text-sm" />
                         </div>
                         <Label>Cerrar sesión</Label>
                       </div>
