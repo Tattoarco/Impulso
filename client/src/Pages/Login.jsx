@@ -18,9 +18,9 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
-      // const res = await fetch(`/api/auth/login`, {
-      method: "POST",
+      // const res = await fetch(`${API}/api/auth/login`, {
+      const res = await fetch(`/api/auth/login`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
@@ -32,7 +32,12 @@ export default function Login() {
 
       login(data.user, data.token);
       // ── PUNTO 1: siempre va al dashboard ──
-      navigate("/dashboard");
+
+      if (data.user.role === "empresa") {
+        navigate("/empresa");
+      } else {
+        navigate("/dashboard");
+      }
     } catch {
       setError("Error de conexión. Intenta de nuevo.");
     } finally {
