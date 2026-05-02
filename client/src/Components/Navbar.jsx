@@ -112,7 +112,7 @@ export default function Navbar() {
                 <Dropdown.Item id="cerrar-sesion" textValue="Cerrar sesión" variant="danger">
                   <div className="flex items-center gap-2 text-red-500">
                     <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                      <i class="fi fi-br-door-closed"></i>
+                      <i className="fi fi-rr-closed"></i>
                     </div>
                     <Label>Cerrar sesión</Label>
                   </div>
