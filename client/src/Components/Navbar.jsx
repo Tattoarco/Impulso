@@ -103,7 +103,7 @@ export default function Navbar() {
                       <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
                         <i className="fi fi-rr-briefcase text-white text-sm" />
                       </div>
-                      <Label>Mi portafolio</Label>
+                      <Label>Mi portafolio 2</Label>
                     </div>
                   </Dropdown.Item>
                 )}
