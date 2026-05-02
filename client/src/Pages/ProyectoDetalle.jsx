@@ -40,6 +40,7 @@ export default function ProyectoDetalle() {
   const [applying, setApplying] = useState(false);
   const [appStatus, setAppStatus] = useState(null);
   const [applicationId, setApplicationId] = useState(null);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [toast, setToast] = useState(null);
 
   const API = import.meta.env.VITE_API_URL;
@@ -137,6 +138,35 @@ export default function ProyectoDetalle() {
     );
 
   const st = APP_STATUS[appStatus];
+
+  const handleWithdraw = async () => {
+    if (!applicationId) return;
+
+    const confirm = window.confirm("¿Seguro que quieres desistir de esta postulación?");
+    if (!confirm) return;
+
+    setWithdrawing(true);
+
+    try {
+      const res = await fetch(`${API}/api/applications/${applicationId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("No se pudo cancelar la postulación.");
+
+      setAppStatus(null);
+      setApplicationId(null);
+
+      showToast("success", "Has desistido de la postulación.");
+    } catch (err) {
+      showToast("error", err.message);
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   return (
     <>
@@ -255,8 +285,29 @@ export default function ProyectoDetalle() {
                     </button>
                   )}
 
-                  {appStatus === "pending" && <p className="text-xs text-center text-gray-400 mb-3 leading-relaxed">La empresa revisará tu perfil y te notificará su decisión.</p>}
+                  {appStatus === "pending" && (
+                    <>
+                      <p className="text-xs text-center text-gray-400 mb-3 leading-relaxed">La empresa revisará tu perfil y te notificará su decisión.</p>
 
+                      <button
+                        onClick={handleWithdraw}
+                        disabled={withdrawing}
+                        className="w-full py-2.5 text-sm font-semibold rounded-xl border border-red-200 
+      text-red-500 bg-red-50 hover:bg-red-100 transition-all cursor-pointer
+      disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {withdrawing ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <i className="fi fi-rr-spinner animate-spin text-xs" /> Cancelando...
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center gap-2">
+                            <i className="fi fi-rr-cross-small text-xs" /> Desistir de la postulación
+                          </span>
+                        )}
+                      </button>
+                    </>
+                  )}
                   {appStatus === "approved" && (
                     <button onClick={goToTimeline} className="w-full py-3.5 bg-green-500 text-white font-bold text-sm rounded-xl border-none cursor-pointer transition-all hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(34,197,94,0.3)] mb-3">
                       <span className="flex items-center justify-center gap-2">
