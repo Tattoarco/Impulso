@@ -1,380 +1,298 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/Authcontext";
 import Footer from "../Components/footer";
 
-const API = import.meta.env.VITE_API_URL;
-
-const STEP_STATUS = {
-  done: { label: "Completado", pill: "bg-green-50 text-green-600 border-green-200", dot: "bg-green-500" },
-  current: { label: "En progreso", pill: "bg-[#FEF0E8] text-[#E26000] border-[#E26000]/30", dot: "bg-[#E26000]" },
-  locked: { label: "Bloqueado", pill: "bg-gray-50 text-gray-400 border-gray-200", dot: "bg-gray-200" },
+const APP_STATUS = {
+  pending:  { label: "Postulación enviada",    icon: "fi-rr-clock",        color: "text-amber-600",  bg: "bg-amber-50 border-amber-200"  },
+  approved: { label: "¡Postulación aprobada!", icon: "fi-rr-check-circle", color: "text-green-600",  bg: "bg-green-50 border-green-200"  },
+  rejected: { label: "No seleccionado",         icon: "fi-rr-cross-circle", color: "text-red-500",    bg: "bg-red-50 border-red-200"      },
 };
 
 function Skeleton() {
   return (
-    <div className="animate-pulse space-y-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6">
-          <div className="flex gap-4">
-            <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-100 rounded w-1/3" />
-              <div className="h-3 bg-gray-100 rounded w-2/3" />
-              <div className="h-3 bg-gray-100 rounded w-1/2" />
-            </div>
-          </div>
+    <div className="animate-pulse space-y-6">
+      <div className="bg-white rounded-2xl p-8 border border-gray-100">
+        <div className="h-4 bg-gray-100 rounded w-24 mb-4" />
+        <div className="h-7 bg-gray-100 rounded w-2/3 mb-3" />
+        <div className="flex gap-3 mb-6">
+          {[20, 24, 16].map((w, i) => <div key={i} className={`h-5 bg-gray-100 rounded-full w-${w}`} />)}
         </div>
-      ))}
-    </div>
-  );
-}
-
-function ProgressBar({ completed, total }) {
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  return (
-    <div className="relative overflow-hidden bg-[#1C1712] rounded-2xl p-6 mb-6 shadow-xl">
-      {/* Orbe decorativo */}
-      <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-[#E26000]/15 blur-2xl pointer-events-none" />
-
-      <div className="relative z-10 flex items-center justify-between mb-4">
-        <div>
-          <p className="text-white font-bold text-sm">Progreso del proyecto</p>
-          <p className="text-white/40 text-xs mt-0.5">
-            {completed} de {total} etapas completadas
-          </p>
-        </div>
-        <span className="text-3xl font-black text-[#E26000]">{pct}%</span>
-      </div>
-
-      {/* Barra */}
-      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #E26000, #FF8C3A)" }} />
-      </div>
-
-      {/* Puntos de etapa */}
-      <div className="flex justify-between mt-2">
-        {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i < completed ? "bg-[#E26000]" : "bg-white/20"}`} />
-        ))}
-      </div>
-
-      {pct === 100 && (
-        <div className="mt-4 flex items-center gap-2 text-[#E26000] text-sm font-semibold">
-          <i className="fi fi-rr-check-circle" /> ¡Proyecto completado! Espera el feedback final.
-        </div>
-      )}
-    </div>
-  );
-}
-
-function StepCard({ step, index, onSubmit, submitting }) {
-  const [answer, setAnswer] = useState("");
-  const [error, setError] = useState("");
-  const textareaRef = useRef(null);
-
-  const tasks = step.tasks ? (typeof step.tasks === "string" ? JSON.parse(step.tasks) : step.tasks) : [];
-  const criteria = step.criteria ? (typeof step.criteria === "string" ? JSON.parse(step.criteria) : step.criteria) : [];
-
-  const isDone = !!step.submission_id;
-  const isLocked = !isDone && !step.unlocked;
-  const isCurrent = !isDone && step.unlocked;
-  const st = isDone ? STEP_STATUS.done : isLocked ? STEP_STATUS.locked : STEP_STATUS.current;
-
-  const handleSubmit = () => {
-    if (!answer.trim()) {
-      setError("Por favor escribe tu respuesta antes de enviar.");
-      textareaRef.current?.focus();
-      return;
-    }
-    setError("");
-    onSubmit(step.step_id, answer.trim());
-  };
-
-  return (
-    <div className="relative flex gap-5 group">
-      {/* Línea + nodo */}
-      <div className="flex flex-col items-center">
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-all shadow-md
-          ${isDone ? "bg-green-500 text-white ring-4 ring-green-100" : ""}
-          ${isCurrent ? "text-white ring-4 ring-[#E26000]/20" : ""}
-          ${isLocked ? "bg-gray-100 text-gray-400" : ""}`}
-          style={isCurrent ? { background: "linear-gradient(135deg, #E26000, #FF8C3A)" } : {}}
-        >
-          {isDone ? <i className="fi fi-rr-check text-xs" /> : index + 1}
-        </div>
-        <div className={`w-px flex-1 mt-2 ${isDone ? "bg-green-200" : "bg-gray-100"}`} style={{ minHeight: 24 }} />
-      </div>
-
-      {/* Card */}
-      <div
-        className={`flex-1 mb-5 rounded-2xl border overflow-hidden transition-all duration-300
-        ${isDone ? "bg-white border-green-100" : ""}
-        ${isCurrent ? "bg-white border-[#E26000]/30 shadow-[0_8px_30px_rgba(226,96,0,0.10)]" : ""}
-        ${isLocked ? "bg-gray-50/80 border-gray-100 opacity-55" : ""}`}
-      >
-        {/* Barra superior coloreada */}
-        {isCurrent && <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #E26000, #FF8C3A)" }} />}
-        {isDone && <div className="h-1 w-full bg-green-400" />}
-
-        <div className="p-5 pb-0">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className={`font-semibold text-sm leading-tight ${isDone ? "text-green-700" : isCurrent ? "text-gray-900" : "text-gray-400"}`}>{step.step_title}</h3>
-            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border shrink-0 ${st.pill}`}>{st.label}</span>
-          </div>
-
-          {step.step_duration && (
-            <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
-              <i className="fi fi-rr-clock text-[10px]" /> {step.step_duration}
-            </p>
-          )}
-          <p className={`text-xs leading-relaxed mb-4 ${isLocked ? "text-gray-400" : "text-gray-600"}`}>{step.step_description}</p>
-        </div>
-
-        {!isLocked && (
-          <div className="px-5 pb-5">
-            {tasks.length > 0 && (
-              <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2.5">Tareas a realizar</p>
-                <ul className="space-y-2">
-                  {tasks.map((t, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
-                      <span className="text-[#E26000] font-bold mt-0.5 shrink-0">›</span>
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {criteria.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {criteria.map((c, i) => (
-                  <span key={i} className="text-[11px] bg-[#FEF0E8] text-[#E26000] border border-[#E26000]/20 px-2.5 py-1 rounded-full font-medium">
-                    {c}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {isDone && (
-              <div className="space-y-3">
-                <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-green-600 mb-2">Tu entrega</p>
-                  <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{step.answer_text}</p>
-                  {step.submitted_at && <p className="text-[10px] text-gray-400 mt-2">Enviado el {new Date(step.submitted_at).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}</p>}
-                </div>
-
-                {step.feedback_text ? (
-                  <div className="bg-[#1C1712] rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <i className="fi fi-rr-comment-check text-[#E26000] text-sm" />
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-[#F0D4C4]">Feedback de la empresa</p>
-                    </div>
-                    <p className="text-xs text-white/75 leading-relaxed">{step.feedback_text}</p>
-                    {step.score && (
-                      <div className="flex items-center gap-1.5 mt-3">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <i key={i} className={`fi fi-${i < step.score ? "sr" : "rr"}-star text-sm ${i < step.score ? "text-amber-400" : "text-white/20"}`} />
-                        ))}
-                        <span className="text-xs text-white/40 ml-1">{step.score}/5</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
-                    <i className="fi fi-rr-clock text-[11px]" /> Esperando feedback de la empresa...
-                  </div>
-                )}
-              </div>
-            )}
-
-            {isCurrent && (
-              <div className="mt-2">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Tu respuesta / entrega</label>
-                <textarea
-                  ref={textareaRef}
-                  value={answer}
-                  onChange={(e) => {
-                    setAnswer(e.target.value);
-                    setError("");
-                  }}
-                  placeholder="Describe tu trabajo, pega un link, comparte tus conclusiones..."
-                  className={`w-full px-4 py-3 border-[1.5px] rounded-xl bg-gray-50 text-sm text-gray-900 outline-none resize-y min-h-28 leading-relaxed transition-all
-                    focus:bg-white focus:shadow-[0_0_0_3px_rgba(226,96,0,0.1)]
-                    ${error ? "border-red-400 focus:border-red-400" : "border-gray-200 focus:border-[#E26000]"}`}
-                />
-                {error && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                    <i className="fi fi-rr-exclamation text-[10px]" /> {error}
-                  </p>
-                )}
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-xs text-gray-400">{answer.length} caracteres</p>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className="flex items-center gap-2 px-5 py-2.5 text-white font-semibold text-sm rounded-xl border-none cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_14px_rgba(226,96,0,0.35)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}
-                  >
-                    {submitting ? (
-                      <>
-                        <i className="fi fi-rr-spinner animate-spin text-sm" /> Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fi fi-rr-paper-plane text-sm" /> Enviar entrega
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {isLocked && (
-          <div className="px-5 pb-4 flex items-center gap-2 text-xs text-gray-400">
-            <i className="fi fi-rr-lock text-[11px]" /> Completa la etapa anterior para desbloquear.
-          </div>
-        )}
+        {[100, 80, 60].map((w, i) => <div key={i} className={`h-3 bg-gray-100 rounded w-${w === 100 ? "full" : w === 80 ? "4/5" : "3/5"} mb-2`} />)}
       </div>
     </div>
   );
 }
 
-export default function Timeline() {
-  const { applicationId } = useParams();
-  const navigate = useNavigate();
-  const { token } = useAuth();
+export default function ProyectoDetalle() {
+  const { id }     = useParams();
+  const navigate   = useNavigate();
+  const user       = JSON.parse(localStorage.getItem("user") || "{}");
+  const isCandidate = user?.role === "candidato";
 
-  const [steps, setSteps] = useState([]);
-  const [jobInfo, setJobInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [job, setJob]                   = useState(null);
+  const [steps, setSteps]               = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [applying, setApplying]         = useState(false);
+  const [appStatus, setAppStatus]       = useState(null);
+  const [applicationId, setApplicationId] = useState(null);
+  const [toast, setToast]               = useState(null);
 
-  const fetchSteps = useCallback(async () => {
-    try {
-      const res = await fetch(`${API}/api/submissions/${applicationId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error || "Error al cargar el timeline.");
-      }
-      const data = await res.json();
-      const enriched = data.steps.map((step, i) => ({
-        ...step,
-        unlocked: i === 0 || !!data.steps[i - 1].submission_id,
-      }));
-      setSteps(enriched);
-      if (data.job) setJobInfo(data.job);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [API, token, applicationId]);
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    if (token) fetchSteps();
-  }, [applicationId, token, fetchSteps]);
+    const fetchJob = async () => {
+      try {
+        const res  = await fetch(`${API}/api/jobs/${id}`);
+        if (!res.ok) throw new Error("Proyecto no encontrado.");
+        const data = await res.json();
+        setJob(data.job);
+        setSteps(data.steps || []);
+      } catch (err) { setError(err.message); }
+      finally { setLoading(false); }
+    };
+    fetchJob();
+  }, [id, API]);
 
-  const handleSubmit = async (stepId, answerText) => {
-    setSubmitting(true);
+  useEffect(() => {
+    if (!isCandidate) return;
+    const check = async () => {
+      try {
+        const res  = await fetch(`${API}/api/applications/mine`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const existing = data.applications?.find((a) => a.job_id === id);
+        if (existing) { setAppStatus(existing.status); setApplicationId(existing.id); }
+      } catch { /* silencioso */ }
+    };
+    check();
+  }, [id, isCandidate, API]);
+
+  const handleApply = async () => {
+    if (!localStorage.getItem("token")) { navigate("/login"); return; }
+    setApplying(true);
     try {
-      const res = await fetch(`${API}/api/submissions`, {
+      const res  = await fetch(`${API}/api/applications`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ application_id: applicationId, step_id: stepId, answer_text: answerText }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+        body: JSON.stringify({ job_id: id }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al enviar.");
-      showToast("success", "¡Entrega enviada! La siguiente etapa se ha desbloqueado.");
-      await fetchSteps();
-    } catch (err) {
-      showToast("error", err.message);
-    } finally {
-      setSubmitting(false);
-    }
+      if (!res.ok) throw new Error(data.error || "Error al postularse.");
+      setAppStatus("pending");
+      setApplicationId(data.application.id);
+      showToast("success", "¡Postulación enviada! La empresa revisará tu perfil.");
+    } catch (err) { showToast("error", err.message); }
+    finally { setApplying(false); }
   };
 
-  const showToast = (type, msg) => {
-    setToast({ type, msg });
-    setTimeout(() => setToast(null), 3500);
-  };
+  const showToast = (type, msg) => { setToast({ type, msg }); setTimeout(() => setToast(null), 3500); };
+  const goToTimeline = () => navigate(`/candidato/timeline/${applicationId}`);
 
-  const completed = steps.filter((s) => !!s.submission_id).length;
-  const total = steps.length;
-  const allDone = completed === total && total > 0;
+  if (loading) return (
+    <div className="flex min-h-screen bg-[#F7F7F8]">
+      <main className="ml-24 flex-1 p-8 max-w-4xl mx-auto"><Skeleton /></main>
+    </div>
+  );
 
-  if (loading)
-    return (
-      <div className="flex min-h-screen bg-[#F7F7F8]">
-        <main className="ml-24 flex-1 p-8 max-w-3xl mx-auto">
-          <Skeleton />
-        </main>
-      </div>
-    );
+  if (error || !job) return (
+    <div className="flex min-h-screen bg-[#F7F7F8]">
+      <main className="ml-24 flex-1 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <i className="fi fi-rr-search text-4xl text-gray-300 block mb-4" />
+          <p className="text-gray-500 font-medium mb-2">Proyecto no encontrado</p>
+          <button onClick={() => navigate(-1)} className="text-sm text-[#E26000] underline cursor-pointer bg-transparent border-none">Volver atrás</button>
+        </div>
+      </main>
+    </div>
+  );
 
-  if (error)
-    return (
-      <div className="flex min-h-screen bg-[#F7F7F8]">
-        <main className="ml-24 flex-1 p-8 flex items-center justify-center">
-          <div className="text-center">
-            <i className="fi fi-rr-shield-exclamation text-4xl text-gray-300 block mb-4" />
-            <p className="text-gray-600 font-medium mb-1">{error}</p>
-            <button onClick={() => navigate(-1)} className="text-sm text-[#E26000] underline cursor-pointer bg-transparent border-none mt-2">
-              Volver atrás
-            </button>
-          </div>
-        </main>
-      </div>
-    );
+  const st = APP_STATUS[appStatus];
 
   return (
     <>
       <div className="flex min-h-screen bg-[#F7F7F8]">
         <main className="ml-24 flex-1 p-8">
-          <div className="max-w-3xl mx-auto">
-            <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 bg-transparent border-none cursor-pointer transition-colors">
+          <div className="max-w-4xl mx-auto">
+
+            <button onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 bg-transparent border-none cursor-pointer transition-colors">
               <i className="fi fi-rr-arrow-left text-xs" /> Volver
             </button>
 
-            {/* Header */}
-            <div className="mb-6">
-              <p className="text-xs font-bold tracking-widest uppercase text-[#E26000] mb-1">Timeline del proyecto</p>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{jobInfo?.title || "Mi proyecto"}</h1>
-              <p className="text-sm text-gray-400 mt-1">Completa cada etapa en orden para avanzar</p>
-            </div>
+            <div className="grid grid-cols-[1fr_300px] gap-6 max-lg:grid-cols-1">
 
-            <ProgressBar completed={completed} total={total} />
+              {/* ── COLUMNA PRINCIPAL ── */}
+              <div className="space-y-5">
 
-            {/* Banner proyecto completado */}
-            {allDone && (
-              <div className="relative overflow-hidden bg-[#1C1712] rounded-2xl p-6 mb-6 border border-[#E26000]/20 text-center shadow-xl">
-                <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-[#E26000]/10 blur-2xl pointer-events-none" />
-                <div className="relative z-10">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}>
-                    <i className="fi fi-sr-diploma text-2xl text-white" />
+                {/* Hero del proyecto */}
+                <div className="relative overflow-hidden rounded-2xl shadow-xl">
+                  {/* Banner oscuro */}
+                  <div className="bg-[#1C1712] px-8 pt-8 pb-6">
+                    <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#E26000]/10 blur-3xl pointer-events-none" />
+                    <div className="relative z-10">
+                      <div className="inline-flex items-center gap-1.5 bg-[#E26000]/20 text-[#E26000] text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-[#E26000]/30">
+                        ✨ Generado con IA
+                      </div>
+                      <h1 className="text-2xl font-bold text-white tracking-tight mb-4">{job.title}</h1>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { icon: "fi-rr-clock",    val: job.duration    },
+                          { icon: "fi-rr-tag",       val: job.profile_area },
+                          { icon: "fi-rr-building",  val: job.company_name },
+                        ].filter(r => r.val).map(({ icon, val }) => (
+                          <span key={val} className="flex items-center gap-1.5 text-xs font-medium text-white/60 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+                            <i className={`fi ${icon} text-[#E26000] text-[11px]`} /> {val}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1">¡Proyecto completado!</h3>
-                  <p className="text-white/50 text-sm mb-4 max-w-sm mx-auto">Enviaste todas las etapas. Cuando la empresa finalice su feedback podrás descargar tu certificado.</p>
-                  <button disabled className="px-6 py-2.5 text-sm font-semibold rounded-xl border-none cursor-not-allowed opacity-50 text-white" style={{ background: "#E26000" }}>
-                    <i className="fi fi-rr-diploma text-sm mr-2" /> Certificado pendiente
-                  </button>
-                </div>
-              </div>
-            )}
 
-            {/* Steps */}
-            <div className="relative">
-              {steps.map((step, i) => (
-                <StepCard key={step.step_id} step={step} index={i} onSubmit={handleSubmit} submitting={submitting} />
-              ))}
+                  {/* Resumen sobre fondo blanco */}
+                  <div className="bg-white px-8 py-6">
+                    <p className="text-sm text-gray-600 leading-relaxed">{job.summary}</p>
+                  </div>
+                </div>
+
+                {/* Etapas */}
+                {steps.length > 0 && (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">
+                      Etapas del proyecto · {steps.length} fases
+                    </p>
+
+                    <div className="relative">
+                      {/* Línea vertical */}
+                      <div className="absolute left-3.5 top-4 bottom-4 w-px bg-gray-100" />
+
+                      <div className="space-y-4">
+                        {steps.map((step, i) => (
+                          <div key={step.id} className="flex gap-4 relative">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 mt-0.5 text-white text-[11px] font-bold shadow-sm"
+                              style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}>
+                              {i + 1}
+                            </div>
+                            <div className="flex-1 bg-gray-50 hover:bg-[#FEF0E8]/40 rounded-xl p-4 border border-gray-100 hover:border-[#E26000]/20 transition-all">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <h4 className="text-sm font-semibold text-gray-900">{step.title}</h4>
+                                {step.duration && (
+                                  <span className="text-xs text-gray-400 flex items-center gap-1 shrink-0">
+                                    <i className="fi fi-rr-clock text-[10px]" /> {step.duration}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-2">{step.description}</p>
+                              {step.tasks && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                  {(typeof step.tasks === "string" ? JSON.parse(step.tasks) : step.tasks)
+                                    .slice(0, 2).map((t, ti) => (
+                                    <span key={ti} className="text-[11px] bg-white border border-gray-200 text-gray-500 px-2 py-0.5 rounded-full">
+                                      {t.length > 40 ? t.slice(0, 40) + "…" : t}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                      <i className="fi fi-rr-lock text-gray-400 text-sm" />
+                      <p className="text-xs text-gray-500">
+                        Las tareas completas se desbloquean una vez que la empresa apruebe tu postulación.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── SIDEBAR ── */}
+              <div className="space-y-4">
+
+                {/* Card de acción */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm sticky top-8">
+
+                  {/* Estado */}
+                  {appStatus && st && (
+                    <div className={`flex items-center gap-2.5 border rounded-xl px-4 py-3 mb-5 ${st.bg}`}>
+                      <i className={`fi ${st.icon} text-sm ${st.color}`} />
+                      <p className={`text-sm font-semibold ${st.color}`}>{st.label}</p>
+                    </div>
+                  )}
+
+                  {/* Botón postular */}
+                  {!appStatus && isCandidate && (
+                    <button onClick={handleApply} disabled={applying}
+                      className="w-full py-3.5 text-white font-bold text-sm rounded-xl border-none cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(226,96,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mb-3"
+                      style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}>
+                      {applying
+                        ? <span className="flex items-center justify-center gap-2"><i className="fi fi-rr-spinner animate-spin text-sm" /> Enviando...</span>
+                        : <span className="flex items-center justify-center gap-2"><i className="fi fi-rr-paper-plane text-sm" /> Postularme</span>}
+                    </button>
+                  )}
+
+                  {appStatus === "pending" && (
+                    <p className="text-xs text-center text-gray-400 mb-3 leading-relaxed">
+                      La empresa revisará tu perfil y te notificará su decisión.
+                    </p>
+                  )}
+
+                  {appStatus === "approved" && (
+                    <button onClick={goToTimeline}
+                      className="w-full py-3.5 bg-green-500 text-white font-bold text-sm rounded-xl border-none cursor-pointer transition-all hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(34,197,94,0.3)] mb-3">
+                      <span className="flex items-center justify-center gap-2">
+                        <i className="fi fi-rr-rocket text-sm" /> Ir al timeline
+                      </span>
+                    </button>
+                  )}
+
+                  {appStatus === "rejected" && (
+                    <p className="text-xs text-center text-gray-400 mb-3 leading-relaxed">
+                      No fuiste seleccionado. Sigue explorando otras oportunidades.
+                    </p>
+                  )}
+
+                  {!isCandidate && !localStorage.getItem("token") && (
+                    <button onClick={() => navigate("/login")}
+                      className="w-full py-3.5 text-white font-bold text-sm rounded-xl border-none cursor-pointer mb-3"
+                      style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}>
+                      Inicia sesión para postularte
+                    </button>
+                  )}
+
+                  {/* Meta info */}
+                  <div className="border-t border-gray-50 pt-4 space-y-3">
+                    {[
+                      { icon: "fi-rr-clock",   label: "Duración", value: job.duration     },
+                      { icon: "fi-rr-tag",      label: "Área",     value: job.profile_area },
+                      { icon: "fi-rr-building", label: "Empresa",  value: job.company_name },
+                      { icon: "fi-rr-list-check", label: "Etapas", value: steps.length ? `${steps.length} fases` : null },
+                    ].filter(r => r.value).map(({ icon, label, value }) => (
+                      <div key={label} className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <i className={`fi ${icon} text-[11px]`} /> {label}
+                        </span>
+                        <span className="text-xs font-semibold text-gray-700">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tip */}
+                {isCandidate && !appStatus && (
+                  <div className="rounded-2xl p-5 border border-[#E26000]/15" style={{ background: "#FEF0E8" }}>
+                    <p className="text-[11px] font-bold tracking-wide uppercase text-[#E26000] mb-2">💡 Tip</p>
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      Revisa bien las etapas antes de postularte. Asegúrate de tener el tiempo y habilidades para completarlas.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </main>
@@ -383,10 +301,8 @@ export default function Timeline() {
       <Footer />
 
       {toast && (
-        <div
-          className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-50 animate-[slideUp_0.3s_ease]
-          ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
-        >
+        <div className={`fixed bottom-7 right-7 px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2.5 shadow-2xl z-50 animate-[slideUp_0.3s_ease]
+          ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
           {toast.type === "success" ? "✅" : "❌"} {toast.msg}
         </div>
       )}
