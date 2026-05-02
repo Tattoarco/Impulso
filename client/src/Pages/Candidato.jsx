@@ -38,7 +38,7 @@ function ProjectCard({ job, navigate }) {
             </span>
           )}
         </div>
-        <div className="mt-4 flex justify-between items-center">
+        <div className="mt-4 flex justify-end items-center">
           <Button
             onClick={(e) => {
               e.stopPropagation();
@@ -46,7 +46,7 @@ function ProjectCard({ job, navigate }) {
             }}
             className="bg-orange-500 text-white cursor-pointer hover:bg-orange-600 hover:shadow-md hover:-translate-y-0.5 transition duration-200"
           >
-            Postular
+            Ver detalles  
           </Button>
         </div>
       </div>

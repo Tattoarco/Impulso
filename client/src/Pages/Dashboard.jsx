@@ -29,10 +29,9 @@ function Skeleton() {
   );
 }
 
-function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
+function JobCard({ job, role, navigate }) {
   const initials = job.title?.slice(0, 2).toUpperCase() || "PR";
   const color = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
-  const hasApplied = appliedIds.includes(job.id);
   const modalBadge = MODALIDAD_BADGE[job.modalidad] || MODALIDAD_BADGE.remoto;
 
   return (
@@ -65,33 +64,10 @@ function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
           {job.pago && <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-semibold">💰 ${parseInt(job.pago).toLocaleString("es-CO")}</span>}
         </div>
 
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-50">
-          <button onClick={() => navigate(`/proyecto/${job.id}`)} className="text-xs text-[#F26419] font-medium cursor-pointer bg-none border-none hover:underline">
-            Ver detalle
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-50">
+          <button onClick={() => navigate(`/proyecto/${job.id}`)} className="text-sm text-[#F26419] font-medium cursor-pointer bg-none border-none hover:underline">
+            Conoce más 
           </button>
-
-          {role === "candidato" && (
-            <button
-              onClick={() => !hasApplied && onApply(job.id)}
-              disabled={hasApplied || applying === job.id}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border-none cursor-pointer transition-all
-                ${hasApplied ? "bg-green-50 text-green-600 cursor-default" : "bg-[#F26419] text-white hover:bg-[#C94E0D] hover:-translate-y-0.5"} disabled:opacity-60 disabled:transform-none`}
-            >
-              {applying === job.id ? (
-                <>
-                  <i className="fi fi-rr-spinner animate-spin" /> Enviando...
-                </>
-              ) : hasApplied ? (
-                <>
-                  <i className="fi fi-rr-check" /> Postulado
-                </>
-              ) : (
-                <>
-                  <i className="fi fi-rr-paper-plane" /> Postular
-                </>
-              )}
-            </button>
-          )}
 
           {role === "empresa" && (
             <button onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-gray-200 text-gray-600 bg-white cursor-pointer hover:border-[#F26419] hover:text-[#F26419] transition-all">
