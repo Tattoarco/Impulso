@@ -14,7 +14,13 @@ const STATUS = {
   closed: { label: "Cerrado", dot: "bg-gray-300", pill: "bg-gray-50 text-gray-500 border border-gray-200" },
 };
 
-const CARD_COLORS = ["from-orange-400 to-rose-400", "from-violet-400 to-purple-500", "from-teal-400 to-cyan-500", "from-blue-400 to-indigo-500", "from-green-400 to-emerald-500"];
+const CARD_COLORS = [
+  "from-[#E26000] to-[#FF8C3A]",
+  "from-[#6651DD] to-[#8B78F0]",
+  "from-[#252B2B] to-[#4D4F4E]",
+  "from-[#4D4F4E] to-[#6B6D6C]",
+  "from-[#CCCCCC] to-[#A8A8A8]",
+];
 
 const MODALIDAD_BADGE = {
   presencial: { label: "Presencial", icon: "🏢", cls: "bg-blue-50 text-blue-600 border-blue-100" },

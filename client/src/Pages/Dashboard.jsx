@@ -11,6 +11,7 @@ const CARD_COLORS = [
   "from-[#6651DD] to-[#8B78F0]",
   "from-[#252B2B] to-[#4D4F4E]",
   "from-[#4D4F4E] to-[#6B6D6C]",
+  "from-[#CCCCCC] to-[#A8A8A8]",
 ];
 
 const MODALIDAD_BADGE = {
