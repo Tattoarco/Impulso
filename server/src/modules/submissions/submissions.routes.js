@@ -28,4 +28,10 @@ router.get("/submissions/:application_id", verifyToken, getSubmissions);
 // Empresa da feedback
 router.post("/submissions/:submission_id/feedback", verifyToken, soloEmpresa, giveFeedback);
 
+const { sendMessage, getMessages } = require("./messages.controller");
+
+// Mensajería por etapa
+router.post("/messages", verifyToken, sendMessage);
+router.get("/messages/:application_id/:step_id", verifyToken, getMessages);
+
 module.exports = router;

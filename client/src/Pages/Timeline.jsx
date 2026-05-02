@@ -115,8 +115,250 @@ function FileUpload({ files, onChange }) {
   );
 }
 
+// ── Pega este componente StepChat ANTES del componente StepCard en Timeline.jsx ──
+
+function StepChat({ step, applicationId, currentUser, onClose }) {
+  const API = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
+
+  const [messages, setMessages] = useState([]);
+  const [input, setInput]       = useState("");
+  const [loading, setLoading]   = useState(true);
+  const [sending, setSending]   = useState(false);
+  const messagesEndRef           = useRef(null);
+
+  // Cargar mensajes al abrir
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(
+          `${API}/api/messages/${applicationId}/${step.step_id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        setMessages(data.messages || []);
+      } catch {
+        setMessages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMessages();
+  }, [applicationId, step.step_id]);
+
+  // Auto-scroll al último mensaje
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || sending) return;
+    const text = input.trim();
+    setInput("");
+    setSending(true);
+
+    // Optimistic update
+    const tempMsg = {
+      id: Date.now(),
+      message: text,
+      sender_id: currentUser.id,
+      sender_name: currentUser.name,
+      sender_role: currentUser.role,
+      created_at: new Date().toISOString(),
+      temp: true,
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+
+    try {
+      const res = await fetch(`${API}/api/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          application_id: applicationId,
+          step_id: step.step_id,
+          message: text,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessages((prev) => prev.map((m) => (m.temp ? data.message : m)));
+      }
+    } catch {
+      // Revertir si falla
+      setMessages((prev) => prev.filter((m) => !m.temp));
+      setInput(text);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    if (isToday) return "Hoy";
+    return d.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+  };
+
+  // Agrupar mensajes por fecha
+  const grouped = messages.reduce((acc, msg) => {
+    const key = new Date(msg.created_at).toDateString();
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(msg);
+    return acc;
+  }, {});
+
+  return (
+    // Overlay
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      {/* Modal */}
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 flex flex-col overflow-hidden"
+        style={{ height: "560px" }}>
+
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3"
+          style={{ background: "linear-gradient(135deg, #1C1712, #2a2016)" }}>
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-white text-sm shrink-0"
+            style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}>
+            <i className="fi fi-rr-comment-dots" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-bold text-sm truncate">{step.step_title}</p>
+            <p className="text-white/40 text-xs">Mensajería de etapa</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all border-none cursor-pointer"
+          >
+            <i className="fi fi-rr-cross text-xs" />
+          </button>
+        </div>
+
+        {/* Mensajes */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1 bg-[#F7F7F8]"
+          style={{ scrollbarWidth: "thin" }}>
+
+          {loading && (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-[#E26000] rounded-full animate-spin" />
+                Cargando mensajes...
+              </div>
+            </div>
+          )}
+
+          {!loading && messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+                <i className="fi fi-rr-comment text-2xl text-gray-300" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-gray-500">Sin mensajes aún</p>
+                <p className="text-xs text-gray-400 mt-1">Usa este chat para resolver dudas sobre esta etapa</p>
+              </div>
+            </div>
+          )}
+
+          {!loading && Object.entries(grouped).map(([dateKey, msgs]) => (
+            <div key={dateKey}>
+              {/* Separador de fecha */}
+              <div className="flex items-center gap-3 my-4">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+                  {formatDate(msgs[0].created_at)}
+                </span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+
+              {msgs.map((msg, i) => {
+                const isMe = msg.sender_id === currentUser.id;
+                const showName = !isMe && (i === 0 || msgs[i - 1]?.sender_id !== msg.sender_id);
+
+                return (
+                  <div key={msg.id} className={`flex gap-2 mb-1.5 ${isMe ? "flex-row-reverse" : ""}`}>
+                    {/* Avatar solo si no es el mismo sender consecutivo */}
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-auto
+                      ${isMe ? "bg-[#E26000] text-white" : "bg-gray-200 text-gray-600"}`}>
+                      {msg.sender_name?.[0]?.toUpperCase() || "?"}
+                    </div>
+
+                    <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col`}>
+                      {showName && !isMe && (
+                        <span className="text-[10px] text-gray-400 font-medium mb-1 ml-1">
+                          {msg.sender_name}
+                          {msg.sender_role === "empresa" && (
+                            <span className="ml-1 text-[#E26000]">· Empresa</span>
+                          )}
+                        </span>
+                      )}
+                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed
+                        ${isMe
+                          ? "text-white rounded-br-sm"
+                          : "bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm"
+                        }
+                        ${msg.temp ? "opacity-70" : ""}`}
+                        style={isMe ? { background: "linear-gradient(135deg, #E26000, #FF8C3A)" } : {}}>
+                        {msg.message}
+                      </div>
+                      <span className={`text-[10px] text-gray-400 mt-1 ${isMe ? "mr-1" : "ml-1"}`}>
+                        {formatTime(msg.created_at)}
+                        {msg.temp && " · Enviando..."}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="px-4 py-3 border-t border-gray-100 bg-white flex gap-2 items-end">
+          <input
+            className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-900 outline-none focus:border-[#E26000] focus:bg-white transition-all resize-none"
+            placeholder="Escribe un mensaje..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            disabled={sending}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim() || sending}
+            className="w-10 h-10 rounded-2xl border-none cursor-pointer flex items-center justify-center shrink-0 transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "linear-gradient(135deg, #E26000, #FF8C3A)" }}
+          >
+            <i className="fi fi-rr-paper-plane text-white text-sm" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── StepCard ─────────────────────────────────────────────────────────── */
 function StepCard({ step, index, onSubmit, submitting }) {
+  // Al inicio de StepCard agrega:
+const [chatOpen, setChatOpen] = useState(false);
+const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [answer, setAnswer] = useState("");
   const [files, setFiles]   = useState([]);
   const [error, setError]   = useState("");
@@ -287,7 +529,27 @@ function StepCard({ step, index, onSubmit, submitting }) {
             )}
           </div>
         )}
+// Dentro del JSX de StepCard, al final del bloque !isLocked, 
+// antes del cierre de la card agrega:
+{!isLocked && (
+  <div className="px-7 pb-5 pt-0 border-t border-gray-50 mt-2">
+    <button
+      onClick={() => setChatOpen(true)}
+      className="flex items-center gap-2 text-sm font-semibold text-[#E26000] bg-[#FEF0E8] hover:bg-[#fde0cc] border border-[#E26000]/20 px-4 py-2.5 rounded-2xl transition-all cursor-pointer border-none"
+    >
+      <i className="fi fi-rr-comment-dots" /> Mensajería
+    </button>
+  </div>
+)}
 
+{chatOpen && (
+  <StepChat
+    step={step}
+    applicationId={applicationId}
+    currentUser={user}
+    onClose={() => setChatOpen(false)}
+  />
+)}
         {isLocked && (
           <div className="px-7 pb-6 flex items-center gap-2 text-sm text-gray-400">
             <i className="fi fi-rr-lock text-xs" /> Completa la etapa anterior para desbloquear esta.
@@ -431,7 +693,7 @@ export default function Timeline() {
 
             <div className="relative">
               {steps.map((step, i) => (
-                <StepCard key={step.step_id} step={step} index={i} onSubmit={handleSubmit} submitting={submitting} />
+               <StepCard key={step.step_id} step={step} index={i} onSubmit={handleSubmit} submitting={submitting} applicationId={applicationId} />
               ))}
             </div>
           </div>

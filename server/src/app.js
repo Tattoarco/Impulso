@@ -19,6 +19,7 @@ app.use("/api", require("./modules/submissions/submissions.routes"));
 app.use("/api", require("./modules/submissions/ProjectFeedback.routes"));
 app.use("/api/portfolio", require("./modules/portafolio/portfolio.routes"));
 app.use("/api/ai", require("./Routes/ai"));
+app.use("/api", require("./modules/submissions/submissions.routes"));
 
 // ── Health ───────────────────────────────────────────
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
