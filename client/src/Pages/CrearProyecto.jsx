@@ -638,7 +638,7 @@ export default function CrearProyecto() {
               <div className="px-5 py-4 border-t border-gray-200 flex gap-2.5 items-end">
                 {/* Botón adjuntar en chat */}
                 <button onClick={() => chatFileRef.current?.click()} title="Adjuntar archivo" className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-400 hover:border-[#F26419] hover:text-[#F26419] transition-all cursor-pointer shrink-0">
-                  <i className="fi fi-sc-file-import text-sm"></i>{" "}
+                  <i className="fi fi-rr-file-import text-sm"></i>
                 </button>
                 <input ref={chatFileRef} type="file" accept=".pdf,image/*" className="hidden" onChange={handleArchivoChat} />
 
