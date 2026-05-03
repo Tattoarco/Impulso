@@ -76,7 +76,7 @@ export default function Navbar() {
             className={`bg-orange-500 flex items-center justify-center transition-all duration-300
             ${scrolled ? "w-6 h-6" : "w-7 h-7"} rounded-lg`}
           >
-            <i className="fi fi-sr-bolt text-white text-sm" />
+            <img src="/LogoNavbar.png" alt="Logo" className="w-4 h-4" />
           </div>
           Impulso
         </div>
