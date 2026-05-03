@@ -1,19 +1,16 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import { Button, Dropdown, Label } from "@heroui/react";
-import { useState, useEffect } from "react";
+
+import logo from "../../Public/LogoNavbar.png";
 
 const NavItem = ({ text, path, isActive, navigate }) => {
   const active = isActive(path);
 
   return (
-    <button
-      onClick={() => navigate(path)}
-      className="relative px-4 py-2 text-sm transition-all duration-200 cursor-pointer border-none group"
-    >
-      <span className={`${active ? "text-white" : "text-gray-300 group-hover:text-white"}`}>
-        {text}
-      </span>
+    <button onClick={() => navigate(path)} className="relative px-4 py-2 text-sm transition-all duration-200 cursor-pointer border-none group">
+      <span className={`${active ? "text-white" : "text-gray-300 group-hover:text-white"}`}>{text}</span>
 
       {/* Línea animada */}
       <span
@@ -63,7 +60,7 @@ export default function Navbar() {
         style={{
           height: scrolled ? "56px" : "64px",
           backgroundColor: `rgba(37, 43, 43, ${scrolled ? 0.75 : 1})`,
-          backdropFilter: scrolled ? "blur(6px)" : "none"
+          backdropFilter: scrolled ? "blur(6px)" : "none",
         }}
       >
         {/* LOGO */}
@@ -72,13 +69,7 @@ export default function Navbar() {
           className={`font-bold cursor-pointer flex items-center gap-2 transition-all duration-300
           ${scrolled ? "text-base" : "text-lg"}`}
         >
-          <div
-            className={`bg-orange-500 flex items-center justify-center transition-all duration-300
-            ${scrolled ? "w-6 h-6" : "w-7 h-7"} rounded-lg`}
-          >
-            <img src="/LogoNavbar.png" alt="Logo" className="w-4 h-4" />
-          </div>
-          Impulso
+          <img src={logo} alt="Logo" className="w-10 h-10 rounded-lg" /> Impulso
         </div>
 
         {/* MENU DESKTOP */}
@@ -106,17 +97,11 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {!user ? (
             <>
-              <button
-                onClick={() => navigate("/login")}
-                className="text-sm text-gray-300 hover:text-white cursor-pointer border-none"
-              >
+              <button onClick={() => navigate("/login")} className="text-sm text-gray-300 hover:text-white cursor-pointer border-none">
                 Iniciar sesión
               </button>
 
-              <button
-                onClick={() => navigate("/registro")}
-                className="bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 cursor-pointer border-none"
-              >
+              <button onClick={() => navigate("/registro")} className="bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 cursor-pointer border-none">
                 Registrarse
               </button>
             </>
@@ -132,8 +117,10 @@ export default function Navbar() {
                   <i className="fi fi-rr-envelope-dot"></i>
                 </Button>
 
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-[10px] 
-                  px-1.5 py-0.5 rounded-full text-white font-bold animate-pulse">
+                <span
+                  className="absolute -top-1 -right-1 bg-orange-500 text-[10px] 
+                  px-1.5 py-0.5 rounded-full text-white font-bold animate-pulse"
+                >
                   3
                 </span>
               </div>
@@ -194,10 +181,7 @@ export default function Navbar() {
               </Dropdown>
 
               {/* HAMBURGUESA */}
-              <button
-                onClick={() => setOpen(!open)}
-                className="md:hidden text-xl"
-              >
+              <button onClick={() => setOpen(!open)} className="md:hidden text-xl">
                 <i className="fi fi-rr-menu-burger"></i>
               </button>
             </>
@@ -208,7 +192,6 @@ export default function Navbar() {
       {/* MOBILE MENU */}
       {open && user && (
         <div className="md:hidden fixed top-16 left-0 w-full bg-[#252B2B] border-t border-white/10 flex flex-col px-6 py-4 gap-4 z-40">
-
           {user.role === "candidato" && (
             <>
               <NavItem text="Inicio" path="/" isActive={isActive} navigate={navigate} />
