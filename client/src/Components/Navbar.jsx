@@ -69,7 +69,7 @@ export default function Navbar() {
           className={`font-bold cursor-pointer flex items-center gap-2 transition-all duration-300
           ${scrolled ? "text-base" : "text-lg"}`}
         >
-          <img src={logo} alt="Logo" className="w-10 h-10 rounded-lg" /> Impulso
+          <img src={logo} alt="Logo" className="w-9 h-10 rounded-lg" /> Impulso
         </div>
 
         {/* MENU DESKTOP */}

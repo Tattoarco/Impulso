@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button, Input, Checkbox, Label } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
 
+import logo from "../../Public/LogoNavbar.png";
+
+
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -18,8 +21,8 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
-      // const res = await fetch(`/api/auth/login`, {
+      // const res = await fetch(`${API}/api/auth/login`, {
+      const res = await fetch(`/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -50,7 +53,7 @@ export default function Login() {
       <div className="hidden md:flex flex-1 bg-orange-500 text-white flex-col justify-between p-12 relative overflow-hidden">
         <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
           <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
-            <i className="fi fi-sr-bolt text-white" />
+          <img src={logo} alt="Logo" className="w-11 h-10 rounded-lg" /> 
           </div>
           <span className="font-bold text-xl">Impulso</span>
         </div>
