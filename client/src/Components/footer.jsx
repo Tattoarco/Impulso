@@ -8,7 +8,7 @@ export default function Footer() {
       <footer className="bg-gray-900 text-white px-[5%] py-10 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-orange-500 rounded-md flex items-center justify-center">
-          <img src={logo} alt="Logo" className="w-12 h-10 rounded-lg" />
+          <img src={logo} alt="Logo" className="w-10 h-10 rounded-lg" />
           </div>
           <span className="font-bold">Impulso</span>
         </div>

@@ -52,7 +52,7 @@ export default function Login() {
     <div className="min-h-screen flex bg-gray-100">
       <div className="hidden md:flex flex-1 bg-orange-500 text-white flex-col justify-between p-12 relative overflow-hidden">
         <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
-          <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
           <img src={logo} alt="Logo" className="w-11 h-10 rounded-lg" /> 
           </div>
           <span className="font-bold text-xl">Impulso</span>
