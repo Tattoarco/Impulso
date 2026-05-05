@@ -89,6 +89,8 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onFeedbackFinal,
     <div className="bg-white rounded-2xl border border-gray-100 hover:border-gray-200 transition-all">
       {/* ── Fila principal ── */}
       <div className="flex items-center gap-4 flex-wrap p-5">
+
+        
         <button onClick={() => onViewProfile(applicant.candidate_id)} className="cursor-pointer bg-transparent border-none p-0" title="Ver perfil">
           <Avatar name={applicant.candidate_name} color={color} />
         </button>

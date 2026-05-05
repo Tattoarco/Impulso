@@ -98,6 +98,7 @@ function App() {
         }
       />
       <Route path="/candidato/timeline/:applicationId" element={<Timeline />} />
+      <Route path="/timeline/:applicationId" element={<Timeline />} />
       <Route path="/proyecto/:id" element={<ProyectoDetalle />} />
       <Route path="/empresa/proyecto/:jobId/postulantes" element={<Postulantes />} />
     </Routes>
