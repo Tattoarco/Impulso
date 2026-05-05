@@ -355,10 +355,10 @@ function StepChat({ step, applicationId, currentUser, onClose }) {
 }
 
 /* ── StepCard ─────────────────────────────────────────────────────────── */
-function StepCard({ step, index, onSubmit, submitting }) {
-  // Al inicio de StepCard agrega:
-const [chatOpen, setChatOpen] = useState(false);
-const user = JSON.parse(localStorage.getItem("user") || "{}");
+/* ── StepCard ─────────────────────────────────────────────────────────── */
+function StepCard({ step, index, onSubmit, submitting, applicationId }) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [answer, setAnswer] = useState("");
   const [files, setFiles]   = useState([]);
   const [error, setError]   = useState("");
@@ -527,35 +527,36 @@ const user = JSON.parse(localStorage.getItem("user") || "{}");
                 </div>
               </div>
             )}
+
+            {/* Botón mensajería */}
+            <div className="mt-5 pt-5 border-t border-gray-100">
+              <button
+                onClick={() => setChatOpen(true)}
+                className="flex items-center gap-2 text-sm font-semibold text-[#E26000] bg-[#FEF0E8] hover:bg-[#fde0cc] px-4 py-2.5 rounded-2xl transition-all cursor-pointer border border-[#E26000]/20"
+              >
+                <i className="fi fi-rr-comment-dots" /> Mensajería
+              </button>
+            </div>
+
           </div>
         )}
-// Dentro del JSX de StepCard, al final del bloque !isLocked, 
-// antes del cierre de la card agrega:
-{!isLocked && (
-  <div className="px-7 pb-5 pt-0 border-t border-gray-50 mt-2">
-    <button
-      onClick={() => setChatOpen(true)}
-      className="flex items-center gap-2 text-sm font-semibold text-[#E26000] bg-[#FEF0E8] hover:bg-[#fde0cc] border border-[#E26000]/20 px-4 py-2.5 rounded-2xl transition-all cursor-pointer border-none"
-    >
-      <i className="fi fi-rr-comment-dots" /> Mensajería
-    </button>
-  </div>
-)}
 
-{chatOpen && (
-  <StepChat
-    step={step}
-    applicationId={applicationId}
-    currentUser={user}
-    onClose={() => setChatOpen(false)}
-  />
-)}
         {isLocked && (
           <div className="px-7 pb-6 flex items-center gap-2 text-sm text-gray-400">
             <i className="fi fi-rr-lock text-xs" /> Completa la etapa anterior para desbloquear esta.
           </div>
         )}
       </div>
+
+      {/* Modal de chat — fuera de la card para evitar overflow:hidden */}
+      {chatOpen && (
+        <StepChat
+          step={step}
+          applicationId={applicationId}
+          currentUser={user}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
     </div>
   );
 }
