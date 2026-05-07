@@ -144,7 +144,7 @@ function StepChat({ step, applicationId, currentUser, onClose }) {
       }
     };
     fetchMessages();
-  }, [applicationId, step.step_id]);
+  }, [API, applicationId, step.step_id, token]);
 
   // Auto-scroll al último mensaje
   useEffect(() => {
@@ -354,7 +354,6 @@ function StepChat({ step, applicationId, currentUser, onClose }) {
   );
 }
 
-/* ── StepCard ─────────────────────────────────────────────────────────── */
 /* ── StepCard ─────────────────────────────────────────────────────────── */
 function StepCard({ step, index, onSubmit, submitting, applicationId }) {
   const [chatOpen, setChatOpen] = useState(false);
