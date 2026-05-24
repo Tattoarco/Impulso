@@ -20,11 +20,11 @@ function MascotaTip({ candidate }) {
   return (
     <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
       {/* Glow */}
-      <div className="absolute -top-10 -right-10 w-32 h-32 bg-white rounded-full blur-2xl" />
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl" />
 
       <div className="relative flex items-start gap-4">
         {/* Mascota */}
-        <div className="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center text-4xl shrink-0 animate-bounce">
+        <div className="w-20 h-20 rounded-2xl bg-white backdrop-blur flex items-center justify-center text-4xl shrink-0 animate-bounce">
           <img src={Mascota} alt="Mascota" />
         </div>
 
