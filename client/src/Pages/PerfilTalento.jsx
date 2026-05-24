@@ -18,7 +18,7 @@ function MascotaTip({ candidate }) {
   const randomTip = tips[Math.floor(Math.random() * tips.length)];
 
   return (
-    <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
+    <div className="bg-orange-100 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
       {/* Glow */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
 
