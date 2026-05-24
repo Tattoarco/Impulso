@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/footer";
+import Mascota from "../../Public/MascotaImage.PNG";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -24,7 +25,7 @@ function MascotaTip({ candidate }) {
       <div className="relative flex items-start gap-4">
         {/* Mascota */}
         <div className="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center text-4xl shrink-0 animate-bounce">
-          🦊
+          <img src={Mascota} alt="Mascota" />
         </div>
 
         <div className="flex-1">
