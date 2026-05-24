@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../Context/Authcontext";
 
 import logo from "../../Public/Logo.jpeg";
-import mascota from "../../Public/mascota.png";
+import mascota from "../../Public/MascotaImagen.PNG";
 
 export default function Login() {
   const navigate = useNavigate();
