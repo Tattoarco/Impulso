@@ -83,7 +83,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     },
-    [token, logout],
+    [token],
   );
 
   /* ── Login ── */

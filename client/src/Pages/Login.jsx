@@ -25,8 +25,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
-        // const res = await fetch(`/api/auth/login`, {
+      // const res = await fetch(`${API}/api/auth/login`, {
+        const res = await fetch(`/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F8FA] overflow-hidden relative">
+    <div className="min-h-screen flex bg-[#f7e6d8] overflow-hidden relative">
       {/* BACKGROUND */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#6651DD]/20 blur-[120px] rounded-full" />
@@ -283,7 +283,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  classNames={{
+                  className={{
                     inputWrapper:
                       "h-13 border border-gray-200 shadow-none rounded-2xl",
                   }}
@@ -300,7 +300,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  classNames={{
+                  className={{
                     inputWrapper:
                       "h-13 border border-gray-200 shadow-none rounded-2xl",
                   }}

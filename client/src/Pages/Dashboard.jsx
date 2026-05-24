@@ -176,15 +176,7 @@ export default function Dashboard() {
 
                   <p className="text-gray-500 mt-3 text-sm md:text-base leading-relaxed">{user?.role === "candidato" ? "Descubre proyectos reales, construye experiencia y fortalece tu perfil profesional." : "Encuentra talento joven y gestiona oportunidades desde un solo lugar."}</p>
 
-                  <div className="flex items-center gap-3 mt-5">
-                    <button onClick={() => navigate("/perfil")} className="px-5 py-3 rounded-2xl bg-[#F26419] text-white text-sm font-semibold border-none cursor-pointer hover:bg-[#D95510] transition-all">
-                      Completar perfil
-                    </button>
-
-                    <button onClick={() => navigate("/proyectos")} className="px-5 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold border-none cursor-pointer hover:bg-gray-200 transition-all">
-                      Explorar
-                    </button>
-                  </div>
+                  
                 </div>
 
                 {/* Mascota */}
