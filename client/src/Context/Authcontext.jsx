@@ -21,7 +21,8 @@ export function AuthProvider({ children }) {
     if (savedToken && savedUser) {
       try {
         setToken(savedToken);
-        setUser(normalizeUser(JSON.parse(savedUser))); // Verificar que el token siga siendo válido
+        setUser(JSON.parse(savedUser));
+        // Verificar que el token siga siendo válido
         refreshUser(savedToken);
       } catch {
         logout();
@@ -83,17 +84,14 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     },
-    [token,  logout],
+    [logout, token],
   );
 
   /* ── Login ── */
   const login = useCallback((userData, authToken) => {
-    const normalized = normalizeUser(userData);
-
-    setUser(normalized);
+    setUser(userData);
     setToken(authToken);
-
-    localStorage.setItem("user", JSON.stringify(normalized));
+    localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", authToken);
   }, []);
 
@@ -109,19 +107,19 @@ export function AuthProvider({ children }) {
   /* ── Actualizar datos del usuario localmente ── */
   // Útil después de editar perfil sin volver a hacer fetch
   const updateUser = useCallback((newUserData) => {
-    const normalized = normalizeUser(newUserData);
+  const normalized = normalizeUser(newUserData);
 
-    setUser((prev) => {
-      const updated = {
-        ...prev,
-        ...normalized,
-      };
+  setUser((prev) => {
+    const updated = {
+      ...prev,
+      ...normalized,
+    };
 
-      localStorage.setItem("user", JSON.stringify(updated));
+    localStorage.setItem("user", JSON.stringify(updated));
 
-      return updated;
-    });
-  }, []);
+    return updated;
+  });
+}, []);
 
   const value = {
     user,
