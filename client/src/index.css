@@ -22,7 +22,6 @@
   }
 }
 
-
 @keyframes slideUp{
   from{opacity:0;transform:translateY(10px)}
   to{opacity:1;transform:translateY(0)}
@@ -37,9 +36,6 @@
 .animate-float{
   animation: float 4s ease-in-out infinite;
 }
-
-
-
 
 * {
   font-family: "Asap", sans-serif;
