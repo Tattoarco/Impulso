@@ -85,9 +85,7 @@ function CandidateCard({ candidate, navigate }) {
           )}
         </div>
       </div>
-      
     </div>
-    
   );
 }
 
@@ -253,15 +251,43 @@ export default function TalentoHub() {
 
           {!loading && filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <i className="fi fi-rr-users text-4xl text-gray-300 block mb-4" />
-              <p className="text-gray-500 font-medium mb-1">No se encontraron candidatos</p>
+              <div className="relative mb-5">
+                <div className="absolute inset-0 bg-orange-200 blur-3xl rounded-full opacity-40" />
+
+                <img
+                  src={MascotaImagenPNG}
+                  alt="Mascota"
+                  className="
+        relative
+        w-28 h-28
+        object-contain
+        animate-[float_5s_ease-in-out_infinite]
+      "
+                />
+              </div>
+
+              <h3 className="text-lg font-bold text-gray-800 mb-1">No encontramos candidatos</h3>
+
+              <p className="text-sm text-gray-400 max-w-sm leading-relaxed mb-4">Intenta ajustar los filtros o buscar otras habilidades para descubrir más talento.</p>
+
               <button
                 onClick={() => {
                   setSearch("");
                   setFilterNivel("all");
                   setFilterArea("all");
                 }}
-                className="text-sm text-[#F26419] underline cursor-pointer bg-none border-none mt-2"
+                className="
+      px-4 py-2
+      rounded-xl
+      bg-[#F26419]
+      text-white
+      text-sm
+      font-semibold
+      border-none
+      cursor-pointer
+      hover:scale-[1.03]
+      transition-all
+    "
               >
                 Limpiar filtros
               </button>

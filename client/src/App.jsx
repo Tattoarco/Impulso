@@ -14,6 +14,7 @@ import Dashboard from "./Pages/Dashboard";
 import MisPostulaciones from "./Pages/Mispostulaciones";
 import Portfolio from "./Pages/Portfolio";
 import TalentoHub from "./Pages/TalentoHub";
+import PerfilTalento from "./Pages/PerfilTalento";
 
 function App() {
   return (
@@ -97,6 +98,14 @@ function App() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/talento/:id"
+        element={
+          <PrivateRoute role="empresa">
+            <PerfilTalento />
+          </PrivateRoute>
+        }
+      />  
       <Route path="/candidato/timeline/:applicationId" element={<Timeline />} />
       <Route path="/timeline/:applicationId" element={<Timeline />} />
       <Route path="/proyecto/:id" element={<ProyectoDetalle />} />

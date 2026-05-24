@@ -30,4 +30,23 @@ router.get('/candidates', verifyToken, soloEmpresa, async (req, res) => {
   }
 });
 
+router.get("/candidates/:id", authMiddleware, async (req, res) => {
+  try {
+    const candidate = await User.findByPk(req.params.id);
+
+    if (!candidate) {
+      return res.status(404).json({
+        error: "Candidato no encontrado",
+      });
+    }
+
+    res.json({ candidate });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Error obteniendo candidato",
+    });
+  }
+});
+
 module.exports = router;
