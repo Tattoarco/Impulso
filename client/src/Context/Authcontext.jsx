@@ -9,20 +9,19 @@ const AuthContext = createContext(null);
    PROVIDER
 ═══════════════════════════════════════ */
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
-  const [token, setToken]     = useState(null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true); // true mientras verifica sesión inicial
 
   /* ── Cargar sesión guardada al montar ── */
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    const savedUser  = localStorage.getItem("user");
+    const savedUser = localStorage.getItem("user");
 
     if (savedToken && savedUser) {
       try {
         setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-        // Verificar que el token siga siendo válido
+        setUser(normalizeUser(JSON.parse(savedUser))); // Verificar que el token siga siendo válido
         refreshUser(savedToken);
       } catch {
         logout();
@@ -32,40 +31,69 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  /* ── Refrescar datos del usuario desde la BD ── */
-  const refreshUser = useCallback(async (tkn) => {
-    const activeToken = tkn || token;
-    if (!activeToken) return;
+  const normalizeUser = (userData) => {
+    let habilidades = [];
+    let proyectos = [];
 
     try {
-      const res = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${activeToken}` },
-      });
-
-      if (!res.ok) {
-        // Token expirado o inválido
-        logout();
-        return;
-      }
-
-      const data = await res.json();
-      const updatedUser = data.user;
-
-      // Actualizar estado y localStorage con datos frescos
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      habilidades = Array.isArray(userData.habilidades) ? userData.habilidades : JSON.parse(userData.habilidades || "[]");
     } catch {
-      // Error de red — mantener sesión local sin desloguear
-    } finally {
-      setLoading(false);
+      habilidades = [];
     }
-  }, [token]);
+
+    try {
+      proyectos = Array.isArray(userData.proyectos) ? userData.proyectos : JSON.parse(userData.proyectos || "[]");
+    } catch {
+      proyectos = [];
+    }
+
+    return {
+      ...userData,
+      habilidades,
+      proyectos,
+    };
+  };
+
+  /* ── Refrescar datos del usuario desde la BD ── */
+  const refreshUser = useCallback(
+    async (tkn) => {
+      const activeToken = tkn || token;
+      if (!activeToken) return;
+
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+
+        if (!res.ok) {
+          // Token expirado o inválido
+          logout();
+          return;
+        }
+
+        const data = await res.json();
+        const normalized = normalizeUser(data.user);
+
+        // Actualizar estado y localStorage con datos frescos
+        setUser(normalized);
+        localStorage.setItem("user", JSON.stringify(normalized));
+      } catch {
+        // Error de red — mantener sesión local sin desloguear
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, logout],
+  );
 
   /* ── Login ── */
   const login = useCallback((userData, authToken) => {
-    setUser(userData);
+    const normalized = normalizeUser(userData);
+
+    setUser(normalized);
     setToken(authToken);
-    localStorage.setItem("user",  JSON.stringify(userData));
+
+    localStorage.setItem("user", JSON.stringify(normalized));
     localStorage.setItem("token", authToken);
   }, []);
 
@@ -80,10 +108,17 @@ export function AuthProvider({ children }) {
 
   /* ── Actualizar datos del usuario localmente ── */
   // Útil después de editar perfil sin volver a hacer fetch
-  const updateUser = useCallback((partial) => {
+  const updateUser = useCallback((newUserData) => {
+    const normalized = normalizeUser(newUserData);
+
     setUser((prev) => {
-      const updated = { ...prev, ...partial };
+      const updated = {
+        ...prev,
+        ...normalized,
+      };
+
       localStorage.setItem("user", JSON.stringify(updated));
+
       return updated;
     });
   }, []);
@@ -97,15 +132,11 @@ export function AuthProvider({ children }) {
     refreshUser,
     updateUser,
     isAuthenticated: !!user && !!token,
-    isEmpresa:       user?.role === "empresa",
-    isCandidate:     user?.role === "candidato",
+    isEmpresa: user?.role === "empresa",
+    isCandidate: user?.role === "candidato",
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 /* ═══════════════════════════════════════

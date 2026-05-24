@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import Footer from "../Components/footer";
 
 const API = import.meta.env.VITE_API_URL;
@@ -317,8 +320,38 @@ export default function EditarPerfil() {
     }
   };
 
-  const handleDownload = () => window.print();
+  const handleDownload = async () => {
+    const element = document.getElementById("cv-preview");
 
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      pdf.save("mi-hoja-de-vida.pdf");
+
+      showToast("success", "PDF descargado correctamente ✓");
+    } catch (err) {
+      console.error(err);
+      showToast("error", "No se pudo descargar el PDF");
+    }
+  };
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 3500);
