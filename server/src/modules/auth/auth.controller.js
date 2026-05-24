@@ -47,7 +47,7 @@ async function getMe(req, res) {
     const result = await pool.query(
       `SELECT u.id, u.name, u.email, u.role, u.created_at,
               u.bio, u.universidad, u.carrera, u.año_graduacion,
-              u.habilidades, u.linkedin, u.portafolio, u.ciudad,
+              u.habilidades, u.linkedin,  u.proyectos,  u.portafolio, u.ciudad,
               c.company_name, c.sector
        FROM users u
        LEFT JOIN companies c ON c.user_id = u.id
@@ -65,7 +65,8 @@ async function getMe(req, res) {
 
 // Candidato actualiza su propio perfil
 async function updateProfile(req, res) {
-  const { name, bio, universidad, carrera, año_graduacion, habilidades, linkedin, portafolio, ciudad } = req.body;
+  const { name, bio, universidad, carrera, año_graduacion, habilidades, linkedin, portafolio, ciudad, proyectos } = req.body;
+
   try {
     const result = await pool.query(
       `UPDATE users SET
@@ -77,15 +78,36 @@ async function updateProfile(req, res) {
          habilidades    = $6,
          linkedin       = $7,
          portafolio     = $8,
-         ciudad         = $9
-       WHERE id = $10
-       RETURNING id, name, email, role, bio, universidad, carrera, año_graduacion, habilidades, linkedin, portafolio, ciudad`,
-      [name || null, bio || null, universidad || null, carrera || null, año_graduacion || null, JSON.stringify(habilidades || []), linkedin || null, portafolio || null, ciudad || null, req.user.id],
+         ciudad         = $9,
+         proyectos      = $10
+       WHERE id = $11
+       RETURNING
+         id,
+         name,
+         email,
+         role,
+         bio,
+         universidad,
+         carrera,
+         año_graduacion,
+         habilidades,
+         linkedin,
+         portafolio,
+         ciudad,
+         proyectos`,
+      [name || null, bio || null, universidad || null, carrera || null, año_graduacion || null, JSON.stringify(habilidades || []), linkedin || null, portafolio || null, ciudad || null, JSON.stringify(proyectos || []), req.user.id],
     );
-    res.json({ message: "Perfil actualizado correctamente.", user: result.rows[0] });
+
+    res.json({
+      message: "Perfil actualizado correctamente.",
+      user: result.rows[0],
+    });
   } catch (err) {
     console.error("Error en updateProfile:", err.message);
-    res.status(500).json({ error: "Error al actualizar el perfil." });
+
+    res.status(500).json({
+      error: "Error al actualizar el perfil.",
+    });
   }
 }
 
@@ -95,7 +117,7 @@ async function getCandidateProfile(req, res) {
   try {
     const result = await pool.query(
       `SELECT id, name, email, bio, universidad, carrera,
-              año_graduacion, habilidades, linkedin, portafolio, ciudad, created_at
+              año_graduacion, habilidades, linkedin, portafolio, ciudad, proyectos, created_at
        FROM users WHERE id = $1 AND role = 'candidato'`,
       [id],
     );

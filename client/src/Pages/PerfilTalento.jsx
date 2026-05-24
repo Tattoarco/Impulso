@@ -125,7 +125,7 @@ export default function PerfilTalento() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-gray-50 pt-28 px-6">
+      <main className="min-h-screen bg-gray-50 pt-10 px-6">
         <div className="max-w-6xl mx-auto">
           {/* Back */}
           <button
