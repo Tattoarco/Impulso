@@ -3,16 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
+import ImpulsoMascot from "../Components/ImpulsoMascot";
 
-// const CARD_COLORS = ["from-orange-400 to-rose-400", "from-violet-400 to-purple-500", "from-teal-400 to-cyan-500", "from-blue-400 to-indigo-500", "from-green-400 to-emerald-500"];
 
-const CARD_COLORS = [
-  "from-[#E26000] to-[#FF8C3A]",
-  "from-[#6651DD] to-[#8B78F0]",
-  "from-[#252B2B] to-[#4D4F4E]",
-  "from-[#4D4F4E] to-[#6B6D6C]",
-  "from-[#CCCCCC] to-[#A8A8A8]",
-];
+const CARD_COLORS = ["from-[#E26000] to-[#FF8C3A]", "from-[#6651DD] to-[#8B78F0]", "from-[#252B2B] to-[#4D4F4E]", "from-[#4D4F4E] to-[#6B6D6C]", "from-[#CCCCCC] to-[#A8A8A8]"];
 
 const MODALIDAD_BADGE = {
   presencial: { label: "🏢 Presencial", cls: "bg-blue-50 text-blue-600 border-blue-200" },
@@ -74,7 +68,7 @@ function JobCard({ job, role, navigate }) {
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-50">
           <button onClick={() => navigate(`/proyecto/${job.id}`)} className="text-sm text-[#F26419] font-medium cursor-pointer bg-none border-none hover:underline">
-            Conoce más 
+            Conoce más
           </button>
 
           {role === "empresa" && (
@@ -219,6 +213,7 @@ export default function Dashboard() {
           </main>
         </div>
         <Footer />
+        <ImpulsoMascot user={user} jobs={filtered} search={search} appliedIds={appliedIds} />
       </div>
 
       {toast && (
