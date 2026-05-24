@@ -2,12 +2,12 @@
 // GET /api/auth/candidates — lista todos los candidatos con su nivel
 // (solo para empresas autenticadas)
 
-const express = require('express');
-const router  = express.Router();
-const pool    = require('../../db/pool');
-const { verifyToken, soloEmpresa } = require('./auth.middleware');
+const express = require("express");
+const router = express.Router();
+const pool = require("../../db/pool");
+const { verifyToken, soloEmpresa } = require("./auth.middleware");
 
-router.get('/candidates', verifyToken, soloEmpresa, async (req, res) => {
+router.get("/candidates", verifyToken, soloEmpresa, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT
@@ -21,7 +21,7 @@ router.get('/candidates', verifyToken, soloEmpresa, async (req, res) => {
        LEFT JOIN applications a ON a.candidate_id = u.id AND a.status = 'approved'
        WHERE u.role = 'candidato'
        GROUP BY u.id, p.id
-       ORDER BY u.nivel_impulso DESC, u.created_at DESC`
+       ORDER BY u.nivel_impulso DESC, u.created_at DESC`,
     );
     res.json({ candidates: result.rows });
   } catch (err) {
@@ -30,19 +30,41 @@ router.get('/candidates', verifyToken, soloEmpresa, async (req, res) => {
   }
 });
 
-router.get("/candidates/:id", authMiddleware, async (req, res) => {
+router.get("/candidates/:id", verifyToken, soloEmpresa, async (req, res) => {
   try {
-    const candidate = await User.findByPk(req.params.id);
+    const result = await pool.query(
+      `SELECT
+          id,
+          name,
+          email,
+          bio,
+          carrera,
+          universidad,
+          habilidades,
+          ciudad,
+          linkedin,
+          portafolio,
+          nivel_impulso,
+          puntos_totales,
+          proyectos
+        FROM users
+        WHERE id = $1
+        AND role = 'candidato'`,
+      [req.params.id],
+    );
 
-    if (!candidate) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         error: "Candidato no encontrado",
       });
     }
 
-    res.json({ candidate });
+    res.json({
+      candidate: result.rows[0],
+    });
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       error: "Error obteniendo candidato",
     });

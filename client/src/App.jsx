@@ -105,7 +105,7 @@ function App() {
             <PerfilTalento />
           </PrivateRoute>
         }
-      />  
+      />
       <Route path="/candidato/timeline/:applicationId" element={<Timeline />} />
       <Route path="/timeline/:applicationId" element={<Timeline />} />
       <Route path="/proyecto/:id" element={<ProyectoDetalle />} />
