@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
-import ImpulsoMascot from "../Components/ImpulsoMascot";
+import Mascota from "../../Public/MascotaImage.PNG";
 
 
 const CARD_COLORS = ["from-[#E26000] to-[#FF8C3A]", "from-[#6651DD] to-[#8B78F0]", "from-[#252B2B] to-[#4D4F4E]", "from-[#4D4F4E] to-[#6B6D6C]", "from-[#CCCCCC] to-[#A8A8A8]"];
@@ -162,10 +162,38 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-1">
           <main className="flex-1 p-8 pt-24">
-            <div className="mb-8">
-              <p className="text-sm text-gray-400">{saludo} 👋</p>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{user?.name || "Usuario"}</h1>
-              <p className="text-sm text-gray-400 mt-0.5">{user?.role === "candidato" ? "Explora proyectos y empieza a ganar experiencia" : "Gestiona tus proyectos y encuentra talento"}</p>
+            <div className="relative overflow-hidden mb-8 rounded-3xl bg-white border border-gray-100 p-6 md:p-8">
+              {/* Fondo decorativo */}
+              <div className="absolute -top-10 -right-10 w-48 h-48 bg-orange-100 rounded-full blur-3xl opacity-40" />
+              <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-orange-50 rounded-full blur-2xl opacity-50" />
+
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                {/* Texto */}
+                <div className="max-w-xl">
+                  <p className="text-sm text-gray-400 mb-1">{saludo} 👋</p>
+
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 leading-tight">Hola, {user?.name || "Usuario"}</h1>
+
+                  <p className="text-gray-500 mt-3 text-sm md:text-base leading-relaxed">{user?.role === "candidato" ? "Descubre proyectos reales, construye experiencia y fortalece tu perfil profesional." : "Encuentra talento joven y gestiona oportunidades desde un solo lugar."}</p>
+
+                  <div className="flex items-center gap-3 mt-5">
+                    <button onClick={() => navigate("/perfil")} className="px-5 py-3 rounded-2xl bg-[#F26419] text-white text-sm font-semibold border-none cursor-pointer hover:bg-[#D95510] transition-all">
+                      Completar perfil
+                    </button>
+
+                    <button onClick={() => navigate("/proyectos")} className="px-5 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold border-none cursor-pointer hover:bg-gray-200 transition-all">
+                      Explorar
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mascota */}
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 bg-orange-200 blur-3xl opacity-30 rounded-full scale-110" />
+
+                  <img src={Mascota} alt="Mascota Impulso" className="relative w-52 md:w-72 object-contain drop-shadow-2xl animate-float" />
+                </div>
+              </div>
             </div>
 
             <div className="relative mb-6">
@@ -213,7 +241,6 @@ export default function Dashboard() {
           </main>
         </div>
         <Footer />
-        <ImpulsoMascot user={user} jobs={filtered} search={search} appliedIds={appliedIds} />
       </div>
 
       {toast && (
