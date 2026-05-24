@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import { Button, Dropdown, Label } from "@heroui/react";
 
-import logo from "../../Public/LogoNavbar.png";
+import logo from "../../Public/Logo.jpeg";
 
 const NavItem = ({ text, path, isActive, navigate }) => {
   const active = isActive(path);

@@ -1,5 +1,5 @@
 import { YearPickerContext } from "@heroui/react";
-import logo from "../../Public/LogoNavbar.png";
+import logo from "../../Public/Logo.jpeg";
 
 
 export default function Footer() {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Input, Checkbox, Label } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
 
-import logo from "../../Public/LogoNavbar.png";
+import logo from "../../Public/Logo.jpeg";
 
 
 export default function Login() {
