@@ -261,7 +261,10 @@ export default function Empresa() {
               {/* Glow blob */}
               <div className="absolute right-32 top-10 w-72 h-72 bg-orange-500/20 blur-3xl rounded-full" />
 
-              <div className="relative z-10 px-10 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+              <div
+                className="relative z-10 px-5 sm:px-6 lg:px-8 py-5 sm:py-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-10
+"
+              >
                 {/* LEFT */}
                 <div className="max-w-2xl">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-5">
@@ -271,9 +274,9 @@ export default function Empresa() {
 
                   <p className="text-white/40 text-sm mb-2">{saludo} 👋</p>
 
-                  <h1 className="text-5xl font-black text-white tracking-tight leading-none">Hola, {firstName}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">Hola, {firstName}</h1>
 
-                  <p className="mt-5 text-white/55 text-[15px] leading-relaxed max-w-xl">Administra tus proyectos, revisa postulaciones y encuentra perfiles alineados con las necesidades de tu empresa.</p>
+                  <p className="mt-2 text-white/55 text-sm sm:text-[15px] leading-relaxed max-w-xl">Administra tus proyectos, revisa postulaciones y encuentra perfiles alineados con las necesidades de tu empresa.</p>
 
                   {/* ACTIONS */}
                   <div className="flex flex-wrap gap-3 mt-8">
@@ -312,13 +315,13 @@ export default function Empresa() {
                 {/* RIGHT SIDE */}
                 <div className="relative hidden lg:flex items-center justify-center w-[340px] h-[240px]">
                   {/* floating card */}
-                  <div className="absolute top-2 left-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-xl">
+                  <div className="absolute top-2 left-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-3 py-2 shadow-xl">
                     <p className="text-xs text-white/40 mb-1">Proyectos activos</p>
                     <h3 className="text-white font-black text-2xl">{activos}</h3>
                   </div>
 
                   {/* floating card */}
-                  <div className="absolute bottom-3 right-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-xl">
+                  <div className="absolute bottom-3 right-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-3 py-2 shadow-xl">
                     <p className="text-xs text-white/40 mb-1">Postulantes</p>
                     <h3 className="text-white font-black text-2xl">{totalPostulantes}</h3>
                   </div>
@@ -401,7 +404,7 @@ export default function Empresa() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2 mb-4">
                   <span className="text-red-400">⚠️</span>
                   <p className="text-sm text-red-500">{error}</p>
                   <button onClick={() => window.location.reload()} className="ml-auto text-xs text-red-400 underline cursor-pointer bg-transparent border-none">

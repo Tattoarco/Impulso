@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/footer";
+import MascotaImagenPNG from "../../Public/MascotaImagen.PNG";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -43,7 +44,7 @@ function CandidateCard({ candidate, navigate }) {
   const nivelInfo = getNivelInfo(candidate.nivel_impulso || 1);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.08)] transition-all overflow-hidden group">
+    <div className="relative bg-white rounded-2xl border ...border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.08)] transition-all overflow-hidden group">
       {/* Barra superior con color por nivel */}
       <div className={`h-1.5 w-full ${nivelInfo.ring.replace("ring-", "bg-")}`} />
       <div className="p-5">
@@ -84,7 +85,9 @@ function CandidateCard({ candidate, navigate }) {
           )}
         </div>
       </div>
+      
     </div>
+    
   );
 }
 
@@ -130,14 +133,80 @@ export default function TalentoHub() {
       <div className="flex min-h-screen bg-gray-50">
         <main className="pt-24 flex-1 p-8">
           {/* Header */}
-          <div className="mb-8">
-            <p className="text-xs font-semibold tracking-widest uppercase text-[#F26419] mb-1">Directorio de talento</p>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Talento Hub</h1>
-            <p className="text-sm text-gray-400 mt-1">Descubre y conecta con los mejores profesionales de Impulso</p>
+          <div
+            className="
+  relative overflow-hidden
+  rounded-[28px]
+  bg-[#151515]
+  border border-white/5
+  p-5 sm:p-6
+  mb-8
+"
+          >
+            {/* glow */}
+            <div className="absolute top-0 right-0 w-72 h-72 bg-orange-500/10 blur-3xl rounded-full" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              {/* LEFT */}
+              <div className="flex items-start gap-4">
+                {/* mascota */}
+                <div
+                  className="
+        relative shrink-0
+        w-20 h-20
+        rounded-2xl
+        bg-white/5
+        border border-white/10
+        flex items-center justify-center
+        backdrop-blur-xl
+      "
+                >
+                  <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full" />
+
+                  <img
+                    src={MascotaImagenPNG}
+                    alt="Mascota"
+                    className="
+            relative z-10
+            w-14 h-14
+            object-contain
+            animate-[float_5s_ease-in-out_infinite]
+            select-none
+            pointer-events-none
+          "
+                  />
+                </div>
+
+                {/* textos */}
+                <div>
+                  <p className="text-[#F26419] text-xs font-bold uppercase tracking-[0.2em] mb-1">Talent assistant</p>
+
+                  <h1 className="text-2xl font-black text-white tracking-tight">Talento Hub</h1>
+
+                  <p className="text-sm text-white/50 mt-2 max-w-xl leading-relaxed">Descubre perfiles destacados, revisa habilidades y encuentra candidatos alineados con las necesidades de tu empresa.</p>
+                </div>
+              </div>
+
+              {/* right badge */}
+              <div
+                className="
+      self-start lg:self-center
+      px-4 py-3
+      rounded-2xl
+      bg-white/5
+      border border-white/10
+      backdrop-blur-xl
+    "
+              >
+                <p className="text-white/40 text-xs mb-1">Talento disponible</p>
+
+                <h3 className="text-white text-2xl font-black">{filtered.length}</h3>
+              </div>
+            </div>
           </div>
 
           {/* Filtros */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6 flex flex-wrap gap-3 items-center">
+          <div className="relative bg-white rounded-2xl border ...border-gray-100 p-5 mb-6 flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-48">
               <i className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nombre, carrera, ciudad o habilidad..." className="w-full pl-9 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#F26419] transition-all" />
@@ -151,6 +220,16 @@ export default function TalentoHub() {
             <span className="text-xs text-gray-400 ml-auto">
               {filtered.length} candidato{filtered.length !== 1 ? "s" : ""}
             </span>
+          </div>
+
+          <div className=" flex items-center gap-3 mb-6 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3">
+            <img src={MascotaImagenPNG} alt="Mascota" className="w-12 h-12 object-contain shrink-0" />
+
+            <div>
+              <p className="text-sm font-semibold text-[#C94E0D]">Consejo de Impulso AI</p>
+
+              <p className="text-xs text-orange-700/80 leading-relaxed">Usa filtros por habilidades y carrera para encontrar candidatos más rápido.</p>
+            </div>
           </div>
 
           {/* Grid */}
