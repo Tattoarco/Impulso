@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/footer";
+import Mascota from "../../Public/MascotaImagen.PNG";
 
 const API = import.meta.env.VITE_API_URL;
 
