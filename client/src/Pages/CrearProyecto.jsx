@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
 import Footer from "../Components/footer";
-import Navbar from "../Components/Navbar";
 
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
@@ -413,9 +412,6 @@ export default function CrearProyecto() {
   // ────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
-      <header>
-        <Navbar />
-      </header>
 
       {/* STEPPER */}
       <div className="bg-white border-b border-gray-200 px-[5%] flex items-center">
