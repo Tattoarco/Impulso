@@ -148,10 +148,6 @@ export default function PerfilTalento() {
                     <h1 className="text-3xl font-black text-gray-900">
                       {candidate.name}
                     </h1>
-
-                    <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-                      Nivel {candidate.nivel_impulso || 1}
-                    </span>
                   </div>
 
                   <p className="text-gray-500 mt-2">
