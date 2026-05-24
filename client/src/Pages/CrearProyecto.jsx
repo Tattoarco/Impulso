@@ -26,7 +26,8 @@ const AREAS = ["Marketing y Comunicación", "Diseño Gráfico / UX", "Desarrollo
 const LEVELS = ["Explorador", "Practicante", "Junior Validado"];
 
 // ── Prompts ──────────────────────────────────────────────────
-const SYSTEM_PROMPT = (info) => `Eres un asistente especializado en ayudar a empresas a crear proyectos profesionales para jóvenes sin experiencia en la plataforma Impulso.
+const SYSTEM_PROMPT = (info, brief = null) => `
+Eres un asistente especializado en ayudar a empresas a crear proyectos profesionales para jóvenes sin experiencia en la plataforma Impulso.
 
 La empresa proporcionó esta información inicial:
 - Título: "${info.title}"
@@ -36,6 +37,9 @@ La empresa proporcionó esta información inicial:
 - Modalidad: "${info.modalidad}"
 - Pago: "${info.pago ? `$${info.pago.toLocaleString("es-CO")} COP` : "No especificado"}"
 ${info.archivoNombre ? `- Archivo adjunto: "${info.archivoNombre}"` : ""}
+
+${brief ? `El brief actual del proyecto es:
+${JSON.stringify(brief, null, 2)}` : ""}
 
 Tu objetivo es hacer una conversación natural y fluida para construir el mejor brief posible. NO hagas preguntas en lista numerada. Haz UNA pregunta a la vez de forma conversacional.
 
@@ -54,7 +58,8 @@ Importante:
 - Si el usuario quiere agregar algo extra, deja que lo haga
 - Nunca hagas más de una pregunta a la vez
 - Adapta el tono según las respuestas del usuario
-- Responde siempre en español`;
+- Responde siempre en español
+`;
 
 const BRIEF_PROMPT = (info, history) => `Con esta información genera un brief en JSON puro (sin markdown):
 
@@ -102,6 +107,37 @@ Reglas:
 - Determina la duración según la complejidad (1 semana a 2 meses)
 - Responde SOLO el array JSON`;
 
+const PRICE_PROMPT = (info) => `
+Eres un asesor experto en compensación para proyectos junior y early-career en Colombia.
+
+Analiza este proyecto:
+
+Título: ${info.title}
+Área: ${info.area}
+Nivel: ${info.level}
+Descripción: ${info.description}
+Modalidad: ${info.modalidad}
+
+Debes recomendar una compensación JUSTA en pesos colombianos para atraer buenos candidatos jóvenes.
+
+Factores importantes:
+- Nivel del perfil
+- Complejidad del proyecto
+- Mercado colombiano
+- Modalidad
+- Cantidad de responsabilidad
+- Competitividad del área
+
+Si el proyecto parece exigente o urgente, recomienda un valor más alto.
+
+Responde SOLO este JSON:
+
+{
+  "suggestedPrice": 800000,
+  "advice": "Texto corto explicando la recomendación"
+}
+`;
+
 // ── Helpers ──────────────────────────────────────────────────
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -130,6 +166,10 @@ export default function CrearProyecto() {
   const [archivoMime, setArchivoMime] = useState(null);
   const [infoErrors, setInfoErrors] = useState({});
 
+  const [priceSuggestion, setPriceSuggestion] = useState(null);
+  const [priceAdvice, setPriceAdvice] = useState("");
+  const [priceLoading, setPriceLoading] = useState(false);
+
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [adjunto, setAdjunto] = useState(null); // archivo para adjuntar en mensaje
@@ -152,7 +192,24 @@ export default function CrearProyecto() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, aiLoading]);
 
-  const tips = ["Cuanto más detallado seas, mejor será el brief que generará la IA.", "Mencionar herramientas concretas (Canva, Figma, Excel...) ayuda a filtrar mejores candidatos.", "Si tienes ejemplos de trabajos similares, compártelos — la IA los tendrá en cuenta."];
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (info.title && info.area && info.level && info.description.length > 20) {
+        generatePriceSuggestion();
+      }
+    }, 1200);
+
+    return () => clearTimeout(timeout);
+  }, [info.title, info.area, info.level, info.description]);
+
+  const tips = [
+    "Cuanto más detallado seas, mejor será el brief que generará la IA.",
+    "Mencionar herramientas concretas (Canva, Figma, Excel...) ayuda a filtrar mejores candidatos.",
+    "Si tienes ejemplos de trabajos similares, compártelos — la IA los tendrá en cuenta.",
+    "Mientras más contexto compartas, más preciso y atractivo será el proyecto para los candidatos.",
+    "Las herramientas específicas como Figma, Excel o React ayudan a encontrar perfiles mucho más compatibles.",
+    "Si tienes ejemplos, referencias o archivos, súbelos. Puedo analizarlos para ayudarte a construir un mejor brief.",
+  ];
 
   // ── Validar paso 1 ──────────────────────────────────────────
   const validateInfo = () => {
@@ -162,6 +219,11 @@ export default function CrearProyecto() {
     if (!info.level) e.level = "Selecciona el nivel";
     if (!info.description.trim()) e.description = "Describe brevemente el proyecto";
     setInfoErrors(e);
+
+    if (!info.pago || Number(info.pago) <= 0) {
+      e.pago = "Define una compensación";
+    }
+
     return Object.keys(e).length === 0;
   };
 
@@ -180,6 +242,49 @@ export default function CrearProyecto() {
     const file = e.target.files?.[0];
     if (!file) return;
     setAdjunto(file);
+  };
+
+  const generatePriceSuggestion = async () => {
+    if (!info.title || !info.area || !info.level || !info.description) {
+      return;
+    }
+
+    setPriceLoading(true);
+
+    try {
+      const res = await fetch(`${API}/api/ai/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 300,
+          messages: [
+            {
+              role: "user",
+              content: PRICE_PROMPT(info),
+            },
+          ],
+        }),
+      });
+
+      const data = await res.json();
+
+      const text = data.content?.[0]?.text || "{}";
+
+      const clean = text.replace(/```json|```/g, "").trim();
+
+      const parsed = JSON.parse(clean);
+
+      setPriceSuggestion(parsed.suggestedPrice || null);
+
+      setPriceAdvice(parsed.advice || "Si necesitas resultados rápidos o perfiles más competitivos, considera aumentar la compensación.");
+    } catch (err) {
+      console.error(err);
+    }
+
+    setPriceLoading(false);
   };
 
   // ── Iniciar chat ─────────────────────────────────────────────
@@ -205,7 +310,7 @@ export default function CrearProyecto() {
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 1200,
-          system: SYSTEM_PROMPT(info),
+          system: SYSTEM_PROMPT(info, brief),
           messages: [{ role: "user", content: userContent }],
         }),
       });
@@ -261,7 +366,7 @@ export default function CrearProyecto() {
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 1200,
-          system: SYSTEM_PROMPT(info),
+          system: SYSTEM_PROMPT(info, brief),
           messages: apiMessages,
         }),
       });
@@ -412,7 +517,6 @@ export default function CrearProyecto() {
   // ────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 font-sans">
-
       {/* STEPPER */}
       <div className="bg-white border-b border-gray-200 px-[5%] flex items-center">
         {[
@@ -430,7 +534,30 @@ export default function CrearProyecto() {
         ))}
       </div>
 
-      <main className="flex-1 px-[5%] py-10 max-w-250 mx-auto w-full">
+      <main className="flex-1 px-[5%] max-w-250 mx-auto w-full">
+        <div className="left-60 z-50 flex items-center gap-3">
+          <img src="/MascotaImagen.PNG" alt="Mascota" className="w-12 h-12 object-cover drop-shadow-lg animate-[float_3s_ease-in-out_infinite]" />
+
+          <button
+            onClick={() => navigate("/empresa")}
+            className="
+              group
+              flex items-center gap-2
+              px-4 py-2.5
+              rounded-2xl
+              bg-white/80
+              backdrop-blur-md
+              border border-white/60
+              shadow-lg
+              text-gray-700
+              hover:bg-white
+              transition-all
+              cursor-pointer
+            "
+          >
+            <span className="text-sm font-semibold">Volver al inicio</span>
+          </button>
+        </div>
         {/* ════ PASO 1 ════ */}
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-9 shadow-sm">
@@ -505,13 +632,39 @@ export default function CrearProyecto() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-gray-700">
                   Compensación (COP)
-                  <span className="ml-2 text-xs font-normal text-gray-400">Opcional</span>
+                  <span className="text-[#F26419] ml-1">*</span>
                 </label>
+
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
-                  <input type="number" min="0" placeholder="Ej: 500000" className="w-full pl-8 pr-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-xl bg-gray-50 text-sm outline-none transition-all focus:border-[#F26419] focus:bg-white" value={info.pago} onChange={(e) => setInfo({ ...info, pago: e.target.value })} />
+
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder={priceSuggestion ? `Ej: ${priceSuggestion.toLocaleString("es-CO")}` : "Ej: 500000"}
+                    className={`w-full pl-8 pr-3.5 py-2.5 border-[1.5px] rounded-xl bg-gray-50 text-sm outline-none transition-all focus:border-[#F26419] focus:bg-white ${infoErrors.pago ? "border-red-500" : "border-gray-200"}`}
+                    value={info.pago}
+                    onChange={(e) => setInfo({ ...info, pago: e.target.value })}
+                  />
                 </div>
-                <p className="text-xs text-gray-400">Deja vacío si es voluntario o por definir</p>
+
+                {infoErrors.pago && <span className="text-xs text-red-500">{infoErrors.pago}</span>}
+
+                {priceSuggestion && (
+                  <div className="mt-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-3">
+                    <p className="text-xs font-semibold text-[#F26419] mb-1">
+                      <img src="/MascotaImage.PNG" alt="Mascota idea" className="w-5 h-5 object-cover inline-block mb-1" /> Recomendación IA
+                    </p>
+
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      Para un proyecto de <strong>{info.area}</strong> con nivel <strong>{info.level}</strong>, la IA recomienda una compensación cercana a <strong>${priceSuggestion.toLocaleString("es-CO")} COP</strong>.
+                    </p>
+
+                    <p className="text-xs text-gray-500 mt-2 leading-relaxed">{priceAdvice}</p>
+
+                    {Number(info.pago) > 0 && Number(info.pago) < priceSuggestion * 0.6 && <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2">⚠️ La compensación parece baja para el nivel y área seleccionados. Esto podría reducir la cantidad o calidad de postulaciones.</div>}
+                  </div>
+                )}
               </div>
 
               {/* Descripción */}
@@ -580,7 +733,9 @@ export default function CrearProyecto() {
             <div className="bg-white rounded-2xl border border-gray-200 flex flex-col h-150 shadow-sm overflow-hidden">
               {/* Header chat */}
               <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
-                <div className="w-9.5 h-9.5 rounded-full bg-linear-to-br from-[#F26419] to-[#C94E0D] flex items-center justify-center text-lg shrink-0">🤖</div>
+                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-lg shrink-0">
+                  <img src="/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                </div>
                 <div>
                   <h4 className="text-[15px] font-bold">Asistente Impulso</h4>
                   <p className="text-xs text-gray-500">Conversación libre para construir tu proyecto</p>
@@ -595,13 +750,15 @@ export default function CrearProyecto() {
               <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 scroll-smooth [scrollbar-width:thin]">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 animate-[msgIn_0.25s_ease] ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5 ${m.role === "ai" ? "bg-linear-to-br from-[#F26419] to-[#C94E0D]" : "bg-gray-200"}`}>{m.role === "ai" ? "🤖" : "😎"}</div>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5 ${m.role === "ai" ? "bg-white" : "bg-gray-200"}`}>{m.role === "ai" ? <img src="/MascotaImagen.PNG" alt="AI" className="w-full h-full object-cover" /> : "😎"}</div>
                     <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}>{m.content}</div>
                   </div>
                 ))}
                 {aiLoading && (
                   <div className="flex gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#F26419] to-[#C94E0D] flex items-center justify-center text-sm">🤖</div>
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sm">
+                      <img src="/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                    </div>
                     <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
                       {[0, 200, 400].map((delay) => (
                         <span key={delay} className="w-1.75 h-1.75 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: `${delay}ms` }} />
@@ -611,7 +768,9 @@ export default function CrearProyecto() {
                 )}
                 {generating && (
                   <div className="flex gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#F26419] to-[#C94E0D] flex items-center justify-center text-sm">🤖</div>
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sm">
+                      <img src="/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                    </div>
                     <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm text-sm text-gray-700">✨ Generando el brief completo...</div>
                   </div>
                 )}
@@ -679,9 +838,43 @@ export default function CrearProyecto() {
                 ))}
                 <p className="text-xs text-gray-400 mt-3 leading-relaxed">La IA puede hacer preguntas adicionales según lo que compartas.</p>
               </div>
-              <div className="bg-[#FEF0E8] rounded-2xl border border-[#F26419]/15 p-4.5">
-                <p className="text-[11px] font-bold tracking-wide uppercase text-[#F26419] mb-2">💡 Consejo</p>
-                <p className="text-sm text-gray-700 leading-relaxed">{tips[tipIdx]}</p>
+
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#FFF4EC] to-[#FFE4D4] rounded-3xl border border-[#F26419]/15 p-5 shadow-sm">
+                {/* Decoración fondo */}
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-[#F26419]/10 rounded-full blur-2xl"></div>
+
+                {/* Header mascota */}
+                <div className="flex items-center gap-3 mb-4 relative z-10">
+                  {/* Mascota */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-[#F26419]/20 rounded-full blur-md animate-pulse"></div>
+
+                    <div className="relative w-14 h-14 rounded-full bg-white border-3 border-white shadow-lg overflow-hidden">
+                      <img src="/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+
+                  {/* Texto */}
+                  <div>
+                    <p className="text-sm font-bold text-[#F26419] leading-none">ImpulsoBot</p>
+
+                    <p className="text-xs text-gray-500 mt-1">Tu guía para crear mejores proyectos</p>
+                  </div>
+                </div>
+
+                {/* Burbuja */}
+                <div className="relative bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-orange-100 z-10">
+                  {/* Pico burbuja */}
+                  <div className="absolute -left-2 top-4 w-4 h-4 bg-white border-l border-t border-orange-100 rotate-45"></div>
+
+                  <p className="text-sm text-gray-700 leading-relaxed">{tips[tipIdx]}</p>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-4 flex items-center gap-2 text-[11px] text-[#F26419] font-medium relative z-10">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  Consejo personalizado por IA
+                </div>
               </div>
             </div>
           </div>
