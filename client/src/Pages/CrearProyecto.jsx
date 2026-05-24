@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useAuth } from "../Context/Authcontext";
+
+import Mascota from "../../Public/MascotaImagen.PNG";
 import Footer from "../Components/footer";
 
 const CheckIcon = () => (
@@ -536,7 +538,7 @@ export default function CrearProyecto() {
 
       <main className="flex-1 px-[5%] max-w-250 mx-auto w-full">
         <div className="left-60 z-50 flex items-center gap-3">
-          <img src="../public/MascotaImagen.PNG" alt="Mascota" className="w-12 h-12 object-cover drop-shadow-lg animate-[float_3s_ease-in-out_infinite]" />
+          <img src={Mascota} alt="Mascota" className="w-12 h-12 object-cover drop-shadow-lg animate-[float_3s_ease-in-out_infinite]" />
 
           <button
             onClick={() => navigate("/empresa")}
@@ -734,7 +736,7 @@ export default function CrearProyecto() {
               {/* Header chat */}
               <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-lg shrink-0">
-                  <img src="../public/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                  <img src={Mascota} alt="Mascota" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="text-[15px] font-bold">Asistente Impulso</h4>
@@ -750,14 +752,14 @@ export default function CrearProyecto() {
               <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 scroll-smooth [scrollbar-width:thin]">
                 {messages.map((m, i) => (
                   <div key={i} className={`flex gap-2.5 animate-[msgIn_0.25s_ease] ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5 ${m.role === "ai" ? "bg-white" : "bg-gray-200"}`}>{m.role === "ai" ? <img src="../public/MascotaImagen.PNG" alt="AI" className="w-full h-full object-cover" /> : "😎"}</div>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5 ${m.role === "ai" ? "bg-white" : "bg-gray-200"}`}>{m.role === "ai" ? <img src={Mascota} alt="AI" className="w-full h-full object-cover" /> : "😎"}</div>
                     <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${m.role === "ai" ? "bg-gray-100 text-gray-900 rounded-bl-sm" : "bg-[#F26419] text-white rounded-br-sm"}`}>{m.content}</div>
                   </div>
                 ))}
                 {aiLoading && (
                   <div className="flex gap-2.5">
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sm">
-                      <img src="../public/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                      <img src={Mascota} alt="Mascota" className="w-full h-full object-cover" />
                     </div>
                     <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
                       {[0, 200, 400].map((delay) => (
@@ -769,7 +771,7 @@ export default function CrearProyecto() {
                 {generating && (
                   <div className="flex gap-2.5">
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sm">
-                      <img src="../public/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                      <img src={Mascota} alt="Mascota" className="w-full h-full object-cover" />
                     </div>
                     <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm text-sm text-gray-700">✨ Generando el brief completo...</div>
                   </div>
@@ -850,7 +852,7 @@ export default function CrearProyecto() {
                     <div className="absolute inset-0 bg-[#F26419]/20 rounded-full blur-md animate-pulse"></div>
 
                     <div className="relative w-14 h-14 rounded-full bg-white border-3 border-white shadow-lg overflow-hidden">
-                      <img src="../public/MascotaImagen.PNG" alt="Mascota" className="w-full h-full object-cover" />
+                      <img src={Mascota} alt="Mascota" className="w-full h-full object-cover" />
                     </div>
                   </div>
 
