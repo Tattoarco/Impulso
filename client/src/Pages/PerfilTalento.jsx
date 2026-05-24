@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/footer";
-import Mascota from "../../Public/MacotaImagen.PNG";
+import Mascota from "../../Public/MascotaImagen.PNG";
 
 const API = import.meta.env.VITE_API_URL;
 
