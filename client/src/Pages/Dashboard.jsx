@@ -5,13 +5,12 @@ import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
 import Mascota from "../../Public/MascotaImagen.PNG";
 
-
-const CARD_COLORS = ["from-[#E26000] to-[#FF8C3A]", "from-[#6651DD] to-[#8B78F0]", "from-[#252B2B] to-[#4D4F4E]", "from-[#4D4F4E] to-[#6B6D6C]", "from-[#CCCCCC] to-[#A8A8A8]"];
+const CARD_COLORS = ["from-[#E26000] to-[#FF8C3A]","from-[#6651DD] to-[#8B78F0]","from-[#252B2B] to-[#4D4F4E]","from-[#4D4F4E] to-[#6B6D6C]","from-[#CCCCCC] to-[#A8A8A8]"];
 
 const MODALIDAD_BADGE = {
-  presencial: { label: "🏢 Presencial", cls: "bg-blue-50 text-blue-600 border-blue-200" },
-  hibrido: { label: "🔀 Híbrido", cls: "bg-purple-50 text-purple-600 border-purple-200" },
-  remoto: { label: "🌐 Remoto", cls: "bg-green-50 text-green-600 border-green-200" },
+  presencial: { label: "🏢 Presencial", cls: "bg-blue-50 text-blue-600 border-blue-200"    },
+  hibrido:    { label: "🔀 Híbrido",    cls: "bg-purple-50 text-purple-600 border-purple-200" },
+  remoto:     { label: "🌐 Remoto",     cls: "bg-green-50 text-green-600 border-green-200"   },
 };
 
 function Skeleton() {
@@ -31,17 +30,18 @@ function Skeleton() {
   );
 }
 
-function JobCard({ job, role, navigate }) {
-  const initials = job.title?.slice(0, 2).toUpperCase() || "PR";
-  const color = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
+function JobCard({ job, role, navigate, appliedIds, onApply, applying }) {
+  const initials   = job.title?.slice(0, 2).toUpperCase() || "PR";
+  const color      = CARD_COLORS[job.title?.charCodeAt(0) % CARD_COLORS.length] || CARD_COLORS[0];
   const modalBadge = MODALIDAD_BADGE[job.modalidad] || MODALIDAD_BADGE.remoto;
+  const hasApplied = appliedIds?.includes(job.id);
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-100 hover:border-[#F26419]/30 hover:shadow-[0_8px_30px_rgba(242,100,25,0.1)] transition-all overflow-hidden">
-      <div className={`h-1 bg-linear-to-r ${color}`} />
+      <div className={`h-1 bg-gradient-to-r ${color}`} />
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{initials}</div>
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{initials}</div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-gray-900 group-hover:text-[#F26419] transition-colors line-clamp-1">{job.title}</h3>
             <p className="text-xs text-gray-400">{job.company_name || "Empresa"}</p>
@@ -50,29 +50,30 @@ function JobCard({ job, role, navigate }) {
 
         <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{job.summary}</p>
 
-        {/* Badges: duración + área + modalidad + pago */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {job.duration && (
-            <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
-              <i className="fi fi-rr-clock text-[10px] text-[#F26419]" /> {job.duration}
-            </span>
-          )}
-          {job.profile_area && (
-            <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
-              <i className="fi fi-rr-tag text-[10px] text-[#F26419]" /> {job.profile_area}
-            </span>
-          )}
+          {job.duration    && <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full"><i className="fi fi-rr-clock text-[10px] text-[#F26419]" /> {job.duration}</span>}
+          {job.profile_area && <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full"><i className="fi fi-rr-tag text-[10px] text-[#F26419]" /> {job.profile_area}</span>}
           <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${modalBadge.cls}`}>{modalBadge.label}</span>
           {job.pago && <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-semibold">💰 ${parseInt(job.pago).toLocaleString("es-CO")}</span>}
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-50">
-          <button onClick={() => navigate(`/proyecto/${job.id}`)} className="text-sm text-[#F26419] font-medium cursor-pointer bg-none border-none hover:underline">
+        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-50">
+          <button onClick={() => navigate(`/proyecto/${job.id}`)} className="text-xs text-[#F26419] font-medium cursor-pointer bg-none border-none hover:underline">
             Conoce más
           </button>
 
+          {role === "candidato" && (
+            <button
+              onClick={() => !hasApplied && onApply(job.id)}
+              disabled={hasApplied || applying === job.id}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border-none cursor-pointer transition-all
+                ${hasApplied ? "bg-green-50 text-green-600 cursor-default" : "bg-[#F26419] text-white hover:bg-[#C94E0D] hover:-translate-y-0.5"} disabled:opacity-60 disabled:transform-none`}>
+              {applying === job.id ? <><i className="fi fi-rr-spinner animate-spin" /> Enviando...</> : hasApplied ? <><i className="fi fi-rr-check" /> Postulado</> : <><i className="fi fi-rr-paper-plane" /> Postular</>}
+            </button>
+          )}
+
           {role === "empresa" && (
-            <button onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border border-gray-200 text-gray-600 bg-white cursor-pointer hover:border-[#F26419] hover:text-[#F26419] transition-all">
+            <button onClick={() => navigate(`/empresa/proyecto/${job.id}/postulantes`)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 text-gray-600 bg-white cursor-pointer hover:border-[#F26419] hover:text-[#F26419] transition-all">
               <i className="fi fi-rr-users text-[10px]" /> Ver postulantes
             </button>
           )}
@@ -83,30 +84,26 @@ function JobCard({ job, role, navigate }) {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const navigate        = useNavigate();
   const { user, token } = useAuth();
 
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs]             = useState([]);
+  const [loading, setLoading]       = useState(true);
   const [appliedIds, setAppliedIds] = useState([]);
-  const [applying, setApplying] = useState(null);
-  const [search, setSearch] = useState("");
-  const [toast, setToast] = useState(null);
+  const [applying, setApplying]     = useState(null);
+  const [search, setSearch]         = useState("");
+  const [toast, setToast]           = useState(null);
 
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const url = `${API}/api/jobs`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        const url  = user?.role === "empresa" ? `${API}/api/jobs/mine` : `${API}/api/jobs`;
+        const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setJobs(data.jobs || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error(err); } finally { setLoading(false); }
     };
     if (token) fetchJobs();
   }, [token, API, user]);
@@ -115,12 +112,10 @@ export default function Dashboard() {
     if (user?.role !== "candidato") return;
     const fetchApplied = async () => {
       try {
-        const res = await fetch(`${API}/api/applications/mine`, { headers: { Authorization: `Bearer ${token}` } });
+        const res  = await fetch(`${API}/api/applications/mine`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setAppliedIds((data.applications || []).map((a) => a.job_id));
-      } catch {
-        /* silencioso */
-      }
+      } catch { /* silencioso */ }
     };
     fetchApplied();
   }, [token, user, API]);
@@ -128,74 +123,85 @@ export default function Dashboard() {
   const handleApply = async (jobId) => {
     setApplying(jobId);
     try {
-      const res = await fetch(`${API}/api/applications`, {
-        method: "POST",
+      const res  = await fetch(`${API}/api/applications`, {
+        method:  "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ job_id: jobId }),
+        body:    JSON.stringify({ job_id: jobId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al postularse.");
       setAppliedIds((prev) => [...prev, jobId]);
       showToast("success", "¡Postulación enviada! La empresa revisará tu perfil.");
-    } catch (err) {
-      showToast("error", err.message);
-    } finally {
-      setApplying(null);
-    }
+    } catch (err) { showToast("error", err.message); } finally { setApplying(null); }
   };
 
-  const showToast = (type, msg) => {
-    setToast({ type, msg });
-    setTimeout(() => setToast(null), 3500);
-  };
+  const showToast = (type, msg) => { setToast({ type, msg }); setTimeout(() => setToast(null), 3500); };
 
-  const filtered = jobs.filter((j) => !search || j.title?.toLowerCase().includes(search.toLowerCase()) || j.profile_area?.toLowerCase().includes(search.toLowerCase()) || j.company_name?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = jobs.filter((j) =>
+    !search ||
+    j.title?.toLowerCase().includes(search.toLowerCase()) ||
+    j.profile_area?.toLowerCase().includes(search.toLowerCase()) ||
+    j.company_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const hora = new Date().getHours();
+  const hora   = new Date().getHours();
   const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
 
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <div className="relative z-50">
-          <Navbar />
-        </div>
+        <div className="relative z-50"><Navbar /></div>
         <div className="flex flex-1">
-          <main className="flex-1 p-8 pt-24">
-            <div className="relative overflow-hidden mb-8 rounded-3xl bg-white border border-gray-100 p-6 md:p-8">
-              {/* Fondo decorativo */}
-              <div className="absolute -top-10 -right-10 w-48 h-48 bg-orange-100 rounded-full blur-3xl opacity-40" />
-              <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-orange-50 rounded-full blur-2xl opacity-50" />
+          <main className="flex-1 p-6 pt-24">
 
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                {/* Texto */}
-                <div className="max-w-xl">
-                  <p className="text-sm text-gray-400 mb-1">{saludo} 👋</p>
+            {/* ── HERO BANNER ── */}
+            <div className="relative overflow-hidden mb-6 rounded-2xl border border-orange-100 shadow-sm"
+              style={{ background: "linear-gradient(135deg, #FEF0E8 0%, #fff7f2 60%, #ffffff 100%)" }}>
 
-                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 leading-tight">Hola, {user?.name || "Usuario"}</h1>
+              {/* Decoración fondo */}
+              <div className="absolute -top-8 -right-8 w-40 h-40 bg-orange-200/30 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-1/4 w-24 h-24 bg-orange-100/40 rounded-full blur-2xl pointer-events-none" />
 
-                  <p className="text-gray-500 mt-3 text-sm md:text-base leading-relaxed">{user?.role === "candidato" ? "Descubre proyectos reales, construye experiencia y fortalece tu perfil profesional." : "Encuentra talento joven y gestiona oportunidades desde un solo lugar."}</p>
-
-                  
+              <div className="relative z-10 flex items-center justify-between px-6 py-5 gap-4">
+                {/* Texto — tamaño corregido */}
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-400 font-medium mb-0.5">{saludo} 👋</p>
+                  {/* ← NOMBRE más pequeño */}
+                  <h1 className="text-lg font-bold text-gray-900 tracking-tight truncate">
+                    {user?.name || "Usuario"}
+                  </h1>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed max-w-sm">
+                    {user?.role === "candidato"
+                      ? "Descubre proyectos reales y construye tu experiencia profesional."
+                      : "Encuentra talento joven y gestiona tus proyectos."}
+                  </p>
                 </div>
 
                 {/* Mascota */}
-                <div className="relative shrink-0">
-                  <div className="absolute inset-0 bg-orange-200 blur-3xl opacity-30 rounded-full scale-110" />
-
-                  <img src={Mascota} alt="Mascota Impulso" className="relative w-52 md:w-72 object-contain drop-shadow-2xl animate-float" />
-                </div>
+                <img
+                  src={Mascota}
+                  alt="Mascota Impulso"
+                  className="w-24 md:w-32 object-contain drop-shadow-lg shrink-0 select-none"
+                  style={{ filter: "drop-shadow(0 8px 16px rgba(242,100,25,0.2))" }}
+                />
               </div>
             </div>
 
-            <div className="relative mb-6">
+            {/* Buscador */}
+            <div className="relative mb-5">
               <i className="fi fi-rr-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por título, área o empresa..." className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm text-gray-900 outline-none focus:border-[#F26419] transition-all" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por título, área o empresa..."
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-2xl text-sm text-gray-900 outline-none focus:border-[#F26419] transition-all"
+              />
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            {/* Grid de proyectos */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <i className="fi fi-rr-briefcase text-[#F26419]" />
                   {user?.role === "empresa" ? "Tus proyectos" : "Proyectos disponibles"}
                   {!loading && <span className="text-xs font-normal text-gray-400 ml-1">({filtered.length})</span>}
@@ -204,28 +210,25 @@ export default function Dashboard() {
 
               {loading && (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <Skeleton key={i} />
-                  ))}
+                  {[1,2,3,4,5,6].map((i) => <Skeleton key={i} />)}
                 </div>
               )}
 
               {!loading && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <i className="fi fi-rr-search text-3xl text-gray-300 block mb-3" />
-                  <p className="text-gray-500 font-medium text-sm mb-1">{search ? "Sin resultados para tu búsqueda" : "No hay proyectos disponibles aún"}</p>
-                  {search && (
-                    <button onClick={() => setSearch("")} className="text-xs text-[#F26419] underline cursor-pointer bg-none border-none mt-1">
-                      Limpiar búsqueda
-                    </button>
-                  )}
+                  <p className="text-gray-500 font-medium text-sm mb-1">
+                    {search ? "Sin resultados para tu búsqueda" : "No hay proyectos disponibles aún"}
+                  </p>
+                  {search && <button onClick={() => setSearch("")} className="text-xs text-[#F26419] underline cursor-pointer bg-none border-none mt-1">Limpiar búsqueda</button>}
                 </div>
               )}
 
               {!loading && filtered.length > 0 && (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filtered.map((job) => (
-                    <JobCard key={job.id} job={job} role={user?.role} navigate={navigate} appliedIds={appliedIds} onApply={handleApply} applying={applying} />
+                    <JobCard key={job.id} job={job} role={user?.role} navigate={navigate}
+                      appliedIds={appliedIds} onApply={handleApply} applying={applying} />
                   ))}
                 </div>
               )}

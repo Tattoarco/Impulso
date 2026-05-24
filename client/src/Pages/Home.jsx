@@ -6,23 +6,18 @@ import Navbar from "../Components/Navbar";
 import Footer from "../Components/footer";
 import Mascota from "../../Public/MascotaImagen.PNG";
 
-const API = import.meta.env.VITE_API_URL;
-
-// Frases fijas por rol — la IA las personaliza con el nombre
 const FRASES_CANDIDATO = [
   { sub: "Estás exactamente donde debes estar 🌱", h1a: "Tu primera experiencia", h1b: "ya está esperándote", p: "Cada proyecto en Impulso es un paso real hacia tu carrera. Sin presión, a tu ritmo, con acompañamiento en cada etapa." },
-  { sub: "El comienzo siempre parece difícil 💛", h1a: "Pero aquí no estás", h1b: "solo/a en esto", p: "Construye experiencia real mientras cuidas tu bienestar. Impulso está diseñado para crecer contigo, no por encima de ti." },
-  { sub: "Tu carrera vale la pena 🚀", h1a: "Proyectos reales,", h1b: "crecimiento tuyo", p: "No necesitas años de experiencia para empezar. Solo necesitas dar el primer paso — y nosotros lo hacemos contigo." },
+  { sub: "El comienzo siempre parece difícil 💛",  h1a: "Pero aquí no estás",   h1b: "solo/a en esto",      p: "Construye experiencia real mientras cuidas tu bienestar. Impulso está diseñado para crecer contigo, no por encima de ti." },
+  { sub: "Tu carrera vale la pena 🚀",             h1a: "Proyectos reales,",     h1b: "crecimiento tuyo",    p: "No necesitas años de experiencia para empezar. Solo necesitas dar el primer paso — y nosotros lo hacemos contigo." },
 ];
-
 const FRASES_EMPRESA = [
-  { sub: "Talento joven, resultados reales 💼", h1a: "Reduce tiempos,", h1b: "impulsa proyectos", p: "Conecta con profesionales en formación que traen energía fresca y creatividad. Tú defines el reto, ellos lo resuelven." },
-  { sub: "Tu pipeline de talento comienza aquí ⚡", h1a: "Proyectos creativos", h1b: "sin burocracia", p: "Publica un proyecto en minutos con ayuda de IA. Recibe postulaciones de jóvenes comprometidos y da feedback que les cambia la vida." },
+  { sub: "Talento joven, resultados reales 💼",       h1a: "Reduce tiempos,",    h1b: "impulsa proyectos",  p: "Conecta con profesionales en formación que traen energía fresca y creatividad. Tú defines el reto, ellos lo resuelven." },
+  { sub: "Tu pipeline de talento comienza aquí ⚡",   h1a: "Proyectos creativos", h1b: "sin burocracia",     p: "Publica un proyecto en minutos con ayuda de IA. Recibe postulaciones de jóvenes comprometidos y da feedback que les cambia la vida." },
 ];
-
 const FRASES_GUEST = [
-  { sub: "¿Buscas experiencia o talento? 👀", h1a: "La plataforma donde", h1b: "el trabajo tiene sentido", p: "Impulso conecta empresas con jóvenes profesionales a través de microproyectos reales. Gana experiencia, construye portafolio y crece sin límites." },
-  { sub: "Tu carrera o tu equipo, aquí empieza 🌟", h1a: "Experiencia real,", h1b: "sin barreras", p: "Únete a cientos de jóvenes que ya están construyendo su futuro y empresas que están encontrando talento diferente. Gratis para empezar." },
+  { sub: "¿Buscas experiencia o talento? 👀",        h1a: "La plataforma donde", h1b: "el trabajo tiene sentido", p: "Impulso conecta empresas con jóvenes profesionales a través de microproyectos reales. Gana experiencia, construye portafolio y crece sin límites." },
+  { sub: "Tu carrera o tu equipo, aquí empieza 🌟", h1a: "Experiencia real,",    h1b: "sin barreras",             p: "Únete a cientos de jóvenes que ya están construyendo su futuro y empresas que están encontrando talento diferente. Gratis para empezar." },
 ];
 
 function useHeroText(user) {
@@ -33,9 +28,9 @@ function useHeroText(user) {
 }
 
 export default function Home() {
-  const { user }   = useAuth();
-  const navigate   = useNavigate();
-  const hero       = useHeroText(user);
+  const { user }  = useAuth();
+  const navigate  = useNavigate();
+  const hero      = useHeroText(user);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -43,13 +38,13 @@ export default function Home() {
   const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const onMove = (e) => {
       const { innerWidth, innerHeight } = window;
-      x.set(e.clientX - innerWidth / 2);
+      x.set(e.clientX - innerWidth  / 2);
       y.set(e.clientY - innerHeight / 2);
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
   }, [x, y]);
 
   const handleCTA = () => user ? navigate("/dashboard") : navigate("/login");
@@ -59,35 +54,29 @@ export default function Home() {
     <div className="min-h-screen bg-white overflow-x-hidden relative">
       <Navbar />
 
+      {/* Fondo */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-50 left-35.7 w-125 h-125 bg-[#6651DD]/20 blur-[150px] rounded-full" />
-        <div className="absolute -bottom-50 left-35.7 w-125 h-125 bg-orange-400/20 blur-[150px] rounded-full" />
+        <div className="absolute -top-50 left-1/3 w-[500px] h-[500px] bg-[#6651DD]/20 blur-[150px] rounded-full" />
+        <div className="absolute -bottom-50 left-1/3 w-[500px] h-[500px] bg-orange-400/20 blur-[150px] rounded-full" />
       </div>
 
-      {/* HERO */}
+      {/* ── HERO ── */}
       <section className="min-h-screen flex items-center px-6 md:px-16">
         <div className="grid md:grid-cols-2 gap-12 w-full max-w-7xl mx-auto items-center">
-          <motion.div
-            key={hero.sub} // re-anima si cambia
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
-          >
-            <p className="text-[#6651DD] font-semibold">{hero.sub}</p>
 
+          {/* Texto */}
+          <motion.div key={hero.sub} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }} className="space-y-6">
+            <p className="text-[#6651DD] font-semibold">{hero.sub}</p>
             <h1 className="text-5xl font-bold leading-tight text-[#252B2B]">
               {hero.h1a} <br />
               <span className="text-[#6651DD]">{hero.h1b}</span>
             </h1>
-
             <p className="text-[#4D4F4E] max-w-md leading-relaxed">{hero.p}</p>
 
             <div className="flex gap-3 flex-wrap">
               <button onClick={handleCTA} className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition">
                 {ctaLabel}
               </button>
-              {/* Segundo CTA contextual */}
               {!user && (
                 <button onClick={() => navigate("/registro")} className="border border-[#6651DD] text-[#6651DD] px-6 py-3 rounded-2xl font-semibold hover:bg-[#6651DD]/5 transition">
                   Ver cómo funciona
@@ -106,9 +95,11 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* RIGHT — 3D card (sin cambios) */}
-          <motion.div style={{ rotateX, rotateY }} className="relative h-110 perspective-distant mt-10">
-            <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 6 }}
+          {/* ── 3D card + MASCOTA flotando ── */}
+          <motion.div style={{ rotateX, rotateY }} className="relative h-[440px] perspective-distant mt-10">
+
+            {/* Card dashboard */}
+            <motion.div animate={{ y:[0,-10,0] }} transition={{ repeat:Infinity, duration:6 }}
               className="absolute w-full h-full bg-white/70 backdrop-blur-2xl rounded-[50px] border border-white/50 shadow-[0_40px_120px_rgba(0,0,0,0.15)] p-6">
               <div className="flex justify-between mb-6">
                 <p className="font-semibold text-[#252B2B]">Dashboard</p>
@@ -136,33 +127,46 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Floating badges */}
             {[{ t:"Usuarios", v:"+500" },{ t:"Match", v:"87%" }].map((item, i) => (
-              <motion.div key={i} animate={{ y: [0, i % 2 === 0 ? -15 : 15, 0] }} transition={{ repeat: Infinity, duration: 5 + i }}
-                className={`absolute ${i === 0 ? "-top-10 -left-8" : "-bottom-10 -right-8"} bg-white/70 backdrop-blur-lg border border-[#CCCCCC] p-4 rounded-2xl shadow-md`}>
+              <motion.div key={i} animate={{ y:[0, i%2===0 ? -15 : 15, 0] }} transition={{ repeat:Infinity, duration:5+i }}
+                className={`absolute ${i===0 ? "-top-10 -left-8" : "-bottom-10 -right-8"} bg-white/70 backdrop-blur-lg border border-[#CCCCCC] p-4 rounded-2xl shadow-md`}>
                 <p className="text-xs text-[#4D4F4E]">{item.t}</p>
                 <p className="text-lg font-bold text-[#6651DD]">{item.v}</p>
               </motion.div>
             ))}
-            <motion.div animate={{ x: [0, 15, 0] }} transition={{ repeat: Infinity, duration: 6 }}
+
+            <motion.div animate={{ x:[0,15,0] }} transition={{ repeat:Infinity, duration:6 }}
               className="absolute top-1/2 -right-14 bg-white/70 backdrop-blur-lg border border-[#CCCCCC] p-3 rounded-xl shadow-md">
               ⭐ 4.8
             </motion.div>
+
+            {/* ── MASCOTA flotando sobre la card ── */}
+            <motion.img
+              src={Mascota}
+              alt="Mascota Impulso"
+              animate={{ y:[0,-12,0], rotate:[-1,1,-1] }}
+              transition={{ repeat:Infinity, duration:4, ease:"easeInOut" }}
+              className="absolute -top-16 -right-10 w-28 md:w-36 object-contain drop-shadow-2xl pointer-events-none select-none z-20"
+              style={{ filter:"drop-shadow(0 12px 24px rgba(242,100,25,0.25))" }}
+            />
           </motion.div>
         </div>
       </section>
 
-      {/* Las secciones de abajo no cambian */}
+      {/* Secciones inferiores */}
       <section className="py-16 px-6 md:px-16 bg-gray-50">
         <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {[
-            { text: "Experiencia real",    icon: "fi fi-rr-briefcase"     },
-            { text: "Sin fricción",        icon: "fi fi-rr-bolt"          },
-            { text: "Crecimiento rápido",  icon: "fi fi-rr-chart-line-up" },
-            { text: "Proyectos cortos",    icon: "fi fi-rr-time-fast"     },
-            { text: "Talento joven",       icon: "fi fi-rr-users"         },
-            { text: "Empresas reales",     icon: "fi fi-rr-building"      },
+            { text:"Experiencia real",   icon:"fi fi-rr-briefcase"     },
+            { text:"Sin fricción",       icon:"fi fi-rr-bolt"          },
+            { text:"Crecimiento rápido", icon:"fi fi-rr-chart-line-up" },
+            { text:"Proyectos cortos",   icon:"fi fi-rr-time-fast"     },
+            { text:"Talento joven",      icon:"fi fi-rr-users"         },
+            { text:"Empresas reales",    icon:"fi fi-rr-building"      },
           ].map((item, i) => (
-            <motion.div key={i} whileHover={{ y: -6 }} className="p-px rounded-2xl bg-gradient-to-br from-[#6651DD]/40 to-orange-400/40">
+            <motion.div key={i} whileHover={{ y:-6 }} className="p-px rounded-2xl bg-gradient-to-br from-[#6651DD]/40 to-orange-400/40">
               <div className="bg-white rounded-2xl px-5 py-4 flex items-center gap-3 hover:shadow-md transition-all duration-300">
                 <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-[#6651DD]/10">
                   <i className={`${item.icon} text-base`} style={{ background:"linear-gradient(135deg,#6651DD,#f97316)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }} />
@@ -188,27 +192,31 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 px-6 md:px-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto space-y-10">
-          <div>
-            <p className="text-xs text-[#6651DD] font-semibold uppercase tracking-wider">Resultados reales</p>
-            <h2 className="text-3xl font-bold text-[#252B2B]">Proyectos que construyen portafolio</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1,2,3].map((_, i) => (
-              <motion.div key={i} whileHover={{ y: -6 }} className="rounded-3xl overflow-hidden border border-[#CCCCCC] bg-white">
-                <div className="h-40 bg-gradient-to-br from-[#6651DD]/20 to-orange-400/20 flex items-center justify-center">
-                  <i className="fi fi-rr-picture text-3xl text-[#6651DD]" />
-                </div>
-                <div className="p-5 space-y-2">
-                  <h3 className="font-semibold text-[#252B2B] text-sm">Landing para startup</h3>
-                  <p className="text-xs text-[#4D4F4E]">Proyecto real desarrollado en 2 semanas</p>
-                  <div className="flex items-center gap-2 text-xs text-[#6651DD] font-medium">
-                    <i className="fi fi-rr-user" /> Ver perfil del creador
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+      {/* CTA final con mascota */}
+      <section className="py-20 px-6 md:px-16 bg-gradient-to-br from-[#FEF0E8] to-white">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10">
+          <motion.img
+            src={Mascota}
+            alt="Mascota Impulso"
+            animate={{ y:[0,-8,0] }}
+            transition={{ repeat:Infinity, duration:3.5, ease:"easeInOut" }}
+            className="w-40 md:w-56 object-contain drop-shadow-2xl shrink-0 select-none"
+            style={{ filter:"drop-shadow(0 12px 24px rgba(242,100,25,0.2))" }}
+          />
+          <div className="text-center md:text-left">
+            <p className="text-xs text-[#6651DD] font-semibold uppercase tracking-wider mb-2">Únete ahora</p>
+            <h2 className="text-3xl font-bold text-[#252B2B] mb-3">¿Listo para dar el salto?</h2>
+            <p className="text-[#4D4F4E] mb-6 leading-relaxed">Miles de jóvenes ya están construyendo su futuro en Impulso. Tú puedes ser el siguiente.</p>
+            <div className="flex gap-3 flex-wrap justify-center md:justify-start">
+              <button onClick={() => navigate(user ? "/dashboard" : "/registro")} className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition">
+                {user ? "Ver experiencias" : "Crear mi cuenta gratis"}
+              </button>
+              {!user && (
+                <button onClick={() => navigate("/login")} className="border border-gray-300 text-gray-600 px-6 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition">
+                  Ya tengo cuenta
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -221,10 +229,10 @@ export default function Home() {
           </div>
           <div className="space-y-4">
             {[
-              { icon: "fi fi-rr-user-add",  text: "Nuevo candidato se unió" },
-              { icon: "fi fi-rr-briefcase", text: "Proyecto publicado por startup" },
-              { icon: "fi fi-rr-check",     text: "Proyecto completado con éxito" },
-              { icon: "fi fi-rr-comment",   text: "Feedback enviado a un candidato" },
+              { icon:"fi fi-rr-user-add",  text:"Nuevo candidato se unió"           },
+              { icon:"fi fi-rr-briefcase", text:"Proyecto publicado por startup"    },
+              { icon:"fi fi-rr-check",     text:"Proyecto completado con éxito"     },
+              { icon:"fi fi-rr-comment",   text:"Feedback enviado a un candidato"   },
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity:0, y:10 }} whileInView={{ opacity:1, y:0 }}
                 className="flex items-center gap-3 bg-gray-50 border border-[#CCCCCC] rounded-xl px-4 py-3">
