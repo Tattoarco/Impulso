@@ -24,7 +24,7 @@ function MascotaTip({ candidate }) {
 
       <div className="relative flex items-start gap-4">
         {/* Mascota */}
-        <div className="w-20 h-20 rounded-2xl bg-white backdrop-blur flex items-center justify-center text-4xl shrink-0 animated-pulse">
+        <div className="w-20 h-20 rounded-2xl bg-orange-200  backdrop-blur flex items-center justify-center text-4xl shrink-0 ">
           <img src={Mascota} alt="Mascota" />
         </div>
 
