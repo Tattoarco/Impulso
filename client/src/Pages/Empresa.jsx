@@ -5,6 +5,7 @@ import { useAuth } from "../Context/Authcontext";
 import StatsCards from "../Components/StatsCards";
 import Footer from "../Components/footer";
 import Navbar from "../Components/Navbar";
+import MascotaImagenPNG from "../../Public/MascotaImagen.PNG";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -14,13 +15,7 @@ const STATUS = {
   closed: { label: "Cerrado", dot: "bg-gray-300", pill: "bg-gray-50 text-gray-500 border border-gray-200" },
 };
 
-const CARD_COLORS = [
-  "from-[#E26000] to-[#FF8C3A]",
-  "from-[#6651DD] to-[#8B78F0]",
-  "from-[#252B2B] to-[#4D4F4E]",
-  "from-[#4D4F4E] to-[#6B6D6C]",
-  "from-[#CCCCCC] to-[#A8A8A8]",
-];
+const CARD_COLORS = ["from-[#E26000] to-[#FF8C3A]", "from-[#6651DD] to-[#8B78F0]", "from-[#252B2B] to-[#4D4F4E]", "from-[#4D4F4E] to-[#6B6D6C]", "from-[#CCCCCC] to-[#A8A8A8]"];
 
 const MODALIDAD_BADGE = {
   presencial: { label: "Presencial", icon: "🏢", cls: "bg-blue-50 text-blue-600 border-blue-100" },
@@ -248,34 +243,118 @@ export default function Empresa() {
         <main className="mt-16 flex-1 px-8 py-8">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* ── Welcome Banner ─────────────────────────────────────── */}
-            <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#1C1712] via-[#2a1f14] to-[#1C1712] p-7 shadow-2xl">
-              <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-[#F26419]/15 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-10 left-20 w-36 h-36 rounded-full bg-orange-400/8 blur-2xl pointer-events-none" />
+            {/* ── Welcome Banner ─────────────────────────────────────── */}
+            <div className="relative overflow-hidden rounded-[32px] bg-[#151515] shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+              {/* Background layers */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(242,100,25,0.22),transparent_35%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,140,58,0.10),transparent_30%)]" />
 
-              <div className="relative z-10 flex items-center justify-between flex-wrap gap-5">
-                <div>
-                  <p className="text-white/50 text-sm mb-1">{saludo} 👋</p>
-                  <h1 className="text-white text-3xl font-black tracking-tight leading-none">{firstName}</h1>
-                  <p className="text-white/40 text-sm mt-2 max-w-md">Gestiona tus proyectos, revisa postulantes y descubre el talento que busca tu empresa.</p>
+              {/* Grid effect */}
+              <div
+                className="absolute inset-0 opacity-[0.04]"
+                style={{
+                  backgroundImage: "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+                  backgroundSize: "40px 40px",
+                }}
+              />
+
+              {/* Glow blob */}
+              <div className="absolute right-32 top-10 w-72 h-72 bg-orange-500/20 blur-3xl rounded-full" />
+
+              <div className="relative z-10 px-10 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+                {/* LEFT */}
+                <div className="max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-5">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs text-white/60 font-medium">Panel empresarial activo</span>
+                  </div>
+
+                  <p className="text-white/40 text-sm mb-2">{saludo} 👋</p>
+
+                  <h1 className="text-5xl font-black text-white tracking-tight leading-none">Hola, {firstName}</h1>
+
+                  <p className="mt-5 text-white/55 text-[15px] leading-relaxed max-w-xl">Administra tus proyectos, revisa postulaciones y encuentra perfiles alineados con las necesidades de tu empresa.</p>
+
+                  {/* ACTIONS */}
+                  <div className="flex flex-wrap gap-3 mt-8">
+                    <button
+                      onClick={() => {
+                        setShowExplore(!showExplore);
+                        window.scrollTo({
+                          top: document.body.scrollHeight,
+                          behavior: "smooth",
+                        });
+                      }}
+                      className={`
+            px-5 py-3 rounded-2xl text-sm font-bold transition-all
+            backdrop-blur-xl border
+            ${showExplore ? "bg-white text-[#151515] border-white" : "bg-white/5 text-white border-white/10 hover:bg-white/10"}
+          `}
+                    >
+                      🌐 {showExplore ? "Ocultar explorador" : "Explorar trabajos"}
+                    </button>
+
+                    <button
+                      onClick={() => navigate("/empresa/crear-proyecto")}
+                      className="
+            px-5 py-3 rounded-2xl text-sm font-bold
+            bg-[#F26419] text-white
+            hover:scale-[1.03]
+            hover:shadow-[0_10px_30px_rgba(242,100,25,0.35)]
+            transition-all
+          "
+                    >
+                      + Crear proyecto
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
-                  {/* Botón explorar todos los trabajos */}
-                  <button
-                    onClick={() => {
-                      setShowExplore(!showExplore);
-                      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-                    }}
-                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl border transition-all cursor-pointer ${showExplore ? "bg-white text-[#1C1712] border-white" : "bg-white/10 text-white border-white/20 hover:bg-white/20"}`}
-                  >
-                    🌐 {showExplore ? "Ocultar explorador" : "Explorar todos los trabajos"}
-                  </button>
+                {/* RIGHT SIDE */}
+                <div className="relative hidden lg:flex items-center justify-center w-[340px] h-[240px]">
+                  {/* floating card */}
+                  <div className="absolute top-2 left-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-xl">
+                    <p className="text-xs text-white/40 mb-1">Proyectos activos</p>
+                    <h3 className="text-white font-black text-2xl">{activos}</h3>
+                  </div>
 
-                  <button onClick={() => navigate("/empresa/crear-proyecto")} className="flex items-center gap-2 px-5 py-2.5 bg-[#F26419] text-white font-bold text-sm rounded-xl border-none cursor-pointer hover:bg-[#C94E0D] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(242,100,25,0.4)] transition-all">
-                    + Crear proyecto
-                  </button>
+                  {/* floating card */}
+                  <div className="absolute bottom-3 right-0 bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-xl">
+                    <p className="text-xs text-white/40 mb-1">Postulantes</p>
+                    <h3 className="text-white font-black text-2xl">{totalPostulantes}</h3>
+                  </div>
+
+                  {/* Mascota container */}
+                  <div className="relative z-10">
+                    {/* glow behind mascot */}
+                    <div className="absolute inset-0 bg-orange-500/30 blur-3xl scale-125 rounded-full" />
+
+                    {/* circular platform */}
+                    <div className="w-[220px] h-[220px] rounded-full bg-white/5 border border-white/10 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.06)]">
+                      <img
+                        src={MascotaImagenPNG}
+                        alt="Mascota"
+                        className="
+              h-[165px]
+              object-contain
+              drop-shadow-[0_12px_25px_rgba(0,0,0,0.45)]
+              animate-[float_5s_ease-in-out_infinite]
+              select-none
+              pointer-events-none
+            "
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* floating animation */}
+              <style>{`
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+  `}</style>
             </div>
 
             {/* ── Stat Cards ─────────────────────────────────────────── */}
