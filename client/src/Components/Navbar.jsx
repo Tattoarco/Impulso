@@ -49,13 +49,25 @@ export default function Navbar() {
   }, []);
 
   const handleAction = (key) => {
-    if (key === "mi-perfil") navigate("/candidato/perfil");
-    if (key === "portafolio") navigate("/portafolio");
-    if (key === "cerrar-sesion") {
-      logout();
-      navigate("/login");
+  if (key === "mi-perfil") {
+    if (user?.role === "empresa") {
+      MySwal.fire({
+        title: "¡Próximamente!",
+        text: "El perfil de empresa está en construcción. Pronto podrás personalizar tu página, agregar logo, descripción y más. ¡Gracias por tu paciencia!",
+        icon: "info",
+        confirmButtonColor: "#E26000",
+        confirmButtonText: "Entendido",
+      });
+    } else {
+      navigate("/candidato/perfil");
     }
-  };
+  }
+  if (key === "portafolio") navigate("/portafolio");
+  if (key === "cerrar-sesion") {
+    logout();
+    navigate("/login");
+  }
+};
 
   return (
     <>
