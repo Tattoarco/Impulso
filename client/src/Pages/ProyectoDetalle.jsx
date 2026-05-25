@@ -91,7 +91,7 @@ Tipos: "fit" = es buena opción para ti, "advertencia" = considera esto antes, "
         className="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-none border-none text-left hover:bg-gray-50 transition-all"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm" style={{ background: "#FAFAFA", border: "1px solid #E26000" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-lg" style={{ background: "#FAFAFA", border: "1px solid #E26000" }}>
             <img src={Mascota} alt="Mascota" className="w-14" />
           </div>
           <div>
