@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useAuth } from "../Context/Authcontext";
@@ -41,8 +41,7 @@ export default function Home() {
   const rotateX = useTransform(y, [-100, 100], [10, -10]);
   const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
-  const MySwal = withReactContent(Swal)
-
+  const MySwal = withReactContent(Swal);
 
   useEffect(() => {
     const onMove = (e) => {
@@ -84,13 +83,15 @@ export default function Home() {
                 {ctaLabel}
               </button>
               {!user && (
-                <button 
+                <button
                   className="border border-[#6651DD] text-[#6651DD] px-6 py-3 rounded-2xl font-semibold hover:bg-[#6651DD]/5 transition"
-                  onClick={() => MySwal.fire({
-                    title: "¡Próximamente registro!",
-                    text: "Estamos interesados en mostarte Impulso completamente, en este momento nos encontramos en mejoras del registro para ofecerte una mejor experiencia. ¡Gracias por tu comprensión!",
-                    icon: "warning",
-                  })}
+                  onClick={() =>
+                    MySwal.fire({
+                      title: "¡Próximamente registro!",
+                      text: "Estamos interesados en mostarte Impulso completamente, en este momento nos encontramos en mejoras del registro para ofecerte una mejor experiencia. ¡Gracias por tu comprensión!",
+                      icon: "warning",
+                    })
+                  }
                 >
                   Ver cómo funciona
                 </button>
@@ -215,9 +216,23 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-[#252B2B] mb-3">¿Listo para dar el salto?</h2>
             <p className="text-[#4D4F4E] mb-6 leading-relaxed">Miles de jóvenes ya están construyendo su futuro en Impulso. Tú puedes ser el siguiente.</p>
             <div className="flex gap-3 flex-wrap justify-center md:justify-start">
-              <button onClick={() => navigate(user ? "/dashboard" : "/registro")} className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition">
+              <button
+                onClick={() =>
+                  navigate(
+                    user
+                      ? "/dashboard"
+                      : MySwal.fire({
+                          title: "¡Próximamente registro!",
+                          text: "Estamos interesados en mostarte Impulso completamente, en este momento nos encontramos en mejoras del registro para ofecerte una mejor experiencia. ¡Gracias por tu comprensión!",
+                          icon: "warning",
+                        }),
+                  )
+                }
+                className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition"
+              >
                 {user ? "Ver experiencias" : "Crear mi cuenta gratis"}
               </button>
+
               {!user && (
                 <button onClick={() => navigate("/login")} className="border border-gray-300 text-gray-600 px-6 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition">
                   Ya tengo cuenta
