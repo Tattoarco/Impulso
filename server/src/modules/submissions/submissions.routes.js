@@ -27,7 +27,8 @@ router.get("/submissions/:application_id", verifyToken, getSubmissions);
 router.post("/submissions/:submission_id/feedback", verifyToken, soloEmpresa, giveFeedback);
 
 // ── Mensajería ────────────────────────────────────────────────────────────
-const { sendMessage, getMessages } = require("./messages.controller");
+const { sendMessage, getMessages, getUnreadCount  } = require("./messages.controller");
+router.get("/messages/unread-count", verifyToken, getUnreadCount);
 router.post("/messages", verifyToken, sendMessage);
 router.get("/messages/:application_id/:step_id", verifyToken, getMessages);
 

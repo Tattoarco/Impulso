@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import { Button, Dropdown, Label } from "@heroui/react";
@@ -8,161 +8,174 @@ import withReactContent from "sweetalert2-react-content";
 
 import logo from "../../Public/Logo.jpeg";
 
+const API = import.meta.env.VITE_API_URL;
+
 const NavItem = ({ text, path, isActive, navigate }) => {
   const active = isActive(path);
-
   return (
-    <button onClick={() => navigate(path)} className="relative px-4 py-2 text-sm transition-all duration-200 cursor-pointer border-none group">
-      <span className={`${active ? "text-white" : "text-gray-300 group-hover:text-white"}`}>{text}</span>
-
-      {/* Línea animada */}
-      <span
-        className={`
-          absolute left-0 -bottom-1 h-0.5 bg-orange-500 transition-all duration-300
-          ${active ? "w-full" : "w-0 group-hover:w-full"}
-        `}
-      />
+    <button onClick={() => navigate(path)}
+      className="relative px-4 py-2 text-sm transition-all duration-200 cursor-pointer border-none group">
+      <span className={active ? "text-white" : "text-gray-300 group-hover:text-white"}>{text}</span>
+      <span className={`absolute left-0 -bottom-1 h-0.5 bg-orange-500 transition-all duration-300 ${active ? "w-full" : "w-0 group-hover:w-full"}`} />
     </button>
   );
 };
 
 export default function Navbar() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, logout } = useAuth();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const { user, logout, token } = useAuth();
+  const MySwal    = withReactContent(Swal);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]         = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [unread, setUnread]     = useState(0);
+  const intervalRef             = useRef(null);
 
   const isActive = (path) => location.pathname === path;
 
-  const MySwal = withReactContent(Swal);
-
+  // Scroll effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fetch unread count y polling cada 30s
+  useEffect(() => {
+    if (!user || !token) return;
+
+    const fetchUnread = async () => {
+      try {
+        const res  = await fetch(`${API}/api/messages/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setUnread(data.count || 0);
+      } catch { /* silencioso */ }
+    };
+
+    fetchUnread(); // inmediato al cargar
+
+    // Polling cada 30 segundos
+    intervalRef.current = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(intervalRef.current);
+  }, [user, token]);
+
+  // Refrescar al cambiar de ruta (por si acaba de leer mensajes)
+  useEffect(() => {
+    if (!user || !token) return;
+    const fetchUnread = async () => {
+      try {
+        const res  = await fetch(`${API}/api/messages/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setUnread(data.count || 0);
+      } catch { /* silencioso */ }
+    };
+    fetchUnread();
+  }, [location.pathname]);
+
   const handleAction = (key) => {
-  if (key === "mi-perfil") {
-    if (user?.role === "empresa") {
-      MySwal.fire({
-        title: "¡Próximamente!",
-        text: "El perfil de empresa está en construcción. Pronto podrás personalizar tu página, agregar logo, descripción y más. ¡Gracias por tu paciencia!",
-        icon: "info",
-        confirmButtonColor: "#E26000",
-        confirmButtonText: "Entendido",
-      });
-    } else {
-      navigate("/candidato/perfil");
+    if (key === "mi-perfil") {
+      if (user?.role === "empresa") {
+        MySwal.fire({
+          title: "¡Próximamente!",
+          text: "El perfil de empresa está en construcción. Pronto podrás personalizar tu página, agregar logo, descripción y más. ¡Gracias por tu paciencia!",
+          icon: "info",
+          confirmButtonColor: "#E26000",
+          confirmButtonText: "Entendido",
+        });
+      } else {
+        navigate("/candidato/perfil");
+      }
     }
-  }
-  if (key === "portafolio") navigate("/portafolio");
-  if (key === "cerrar-sesion") {
-    logout();
-    navigate("/login");
-  }
-};
+    if (key === "portafolio")    navigate("/portafolio");
+    if (key === "cerrar-sesion") { logout(); navigate("/login"); }
+  };
 
   return (
     <>
       <nav
-        className="fixed z-50 w-full flex items-center justify-between px-6 
-        text-white border-b border-white/10 transition-all duration-300"
+        className="fixed z-50 w-full flex items-center justify-between px-6 text-white border-b border-white/10 transition-all duration-300"
         style={{
-          height: scrolled ? "56px" : "64px",
-          backgroundColor: `rgba(37, 43, 43, ${scrolled ? 0.75 : 1})`,
-          backdropFilter: scrolled ? "blur(6px)" : "none",
+          height:          scrolled ? "56px" : "64px",
+          backgroundColor: `rgba(37,43,43,${scrolled ? 0.75 : 1})`,
+          backdropFilter:  scrolled ? "blur(6px)" : "none",
         }}
       >
-        {/* LOGO */}
-        <div
-          onClick={() => navigate("/")}
-          className={`font-bold cursor-pointer flex items-center gap-2 transition-all duration-300
-          ${scrolled ? "text-base" : "text-lg"}`}
-        >
+        {/* Logo */}
+        <div onClick={() => navigate("/")}
+          className={`font-bold cursor-pointer flex items-center gap-2 transition-all duration-300 ${scrolled ? "text-base" : "text-lg"}`}>
           <img src={logo} alt="Logo" className="w-10 h-10 rounded-lg" /> Impulso
         </div>
 
-        {/* MENU DESKTOP */}
+        {/* Menu desktop */}
         {user && (
           <div className="hidden md:flex items-center gap-6">
             {user.role === "candidato" && (
               <>
-                <NavItem text="Inicio" path="/" isActive={isActive} navigate={navigate} />
-                <NavItem text="Oportunidades" path="/dashboard" isActive={isActive} navigate={navigate} />
-                <NavItem text="Mis proyectos" path="/candidato" isActive={isActive} navigate={navigate} />
+                <NavItem text="Inicio"        path="/"           isActive={isActive} navigate={navigate} />
+                <NavItem text="Oportunidades" path="/dashboard"  isActive={isActive} navigate={navigate} />
+                <NavItem text="Mis proyectos" path="/candidato"  isActive={isActive} navigate={navigate} />
                 <NavItem text="Mi portafolio" path="/portafolio" isActive={isActive} navigate={navigate} />
               </>
             )}
             {user.role === "empresa" && (
               <>
-                <NavItem text="Inicio" path="/" isActive={isActive} navigate={navigate} />
+                <NavItem text="Inicio"        path="/"        isActive={isActive} navigate={navigate} />
                 <NavItem text="Mis proyectos" path="/empresa" isActive={isActive} navigate={navigate} />
-                <NavItem text="Talentos" path="/talento" isActive={isActive} navigate={navigate} />
+                <NavItem text="Talentos"      path="/talento" isActive={isActive} navigate={navigate} />
               </>
             )}
           </div>
         )}
 
-        {/* DERECHA */}
+        {/* Derecha */}
         <div className="flex items-center gap-3">
           {!user ? (
             <>
-              <button onClick={() => navigate("/login")} className="text-sm text-gray-300 hover:text-white cursor-pointer border-none">
+              <button onClick={() => navigate("/login")}
+                className="text-sm text-gray-300 hover:text-white cursor-pointer border-none">
                 Iniciar sesión
               </button>
-
               <button
                 className="bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 cursor-pointer border-none"
-                onClick={() =>
-                  MySwal.fire({
-                    title: "¡Próximamente registro!",
-                    text: "Estamos interesados en mostarte Impulso completamente, en este momento nos encontramos en mejoras del registro para ofecerte una mejor experiencia. ¡Gracias por tu comprensión!",
-                    icon: "warning",
-                  })
-                }
-              >
-                Registrate
+                onClick={() => MySwal.fire({
+                  title: "¡Próximamente registro!",
+                  text:  "Estamos mejorando el registro para ofrecerte una mejor experiencia. ¡Gracias por tu comprensión!",
+                  icon:  "warning",
+                })}>
+                Regístrate
               </button>
             </>
           ) : (
             <>
-              {/* MENSAJES + BADGE */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  className="text-white cursor-pointer text-xl transition-all duration-200 
-                  hover:text-orange-500 hover:scale-110 active:scale-95"
-                >
-                  <i className="fi fi-rr-envelope-dot"></i>
-                </Button>
+              {/* ── Botón de mensajes con badge dinámico ── */}
+              <button
+                onClick={() => navigate(user.role === "candidato" ? "/candidato" : "/empresa")}
+                className="relative text-white text-xl cursor-pointer hover:text-orange-400 transition-all duration-200 hover:scale-110 active:scale-95 bg-transparent border-none"
+                title="Mensajes"
+              >
+                <i className="fi fi-rr-envelope-dot" />
 
-                <span
-                  className="absolute -top-1 -right-1 bg-orange-500 text-[10px] 
-                  px-1.5 py-0.5 rounded-full text-white font-bold animate-pulse"
-                >
-                  3
-                </span>
-              </div>
+                {/* Badge — solo se muestra si hay no leídos */}
+                {unread > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-orange-500 text-[10px] rounded-full text-white font-bold flex items-center justify-center animate-pulse leading-none">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
+              </button>
 
-              {/* DROPDOWN */}
-              <Dropdown onOpenChange={(open) => setMenuOpen(open)}>
-                <Button
-                  aria-label="Menu"
-                  variant="ghost"
-                  className="text-xl text-white cursor-pointer transition-all duration-300 
-                  hover:text-orange-500 hover:scale-110 active:scale-95"
-                >
-                  <i
-                    className={`fi fi-rr-user-gear transition-all duration-300 
-                    ${menuOpen ? "rotate-180 text-orange-500 scale-110" : ""}`}
-                  />
+              {/* Dropdown usuario */}
+              <Dropdown onOpenChange={(o) => setMenuOpen(o)}>
+                <Button aria-label="Menu" variant="ghost"
+                  className="text-xl text-white cursor-pointer transition-all duration-300 hover:text-orange-500 hover:scale-110 active:scale-95">
+                  <i className={`fi fi-rr-user-gear transition-all duration-300 ${menuOpen ? "rotate-180 text-orange-500 scale-110" : ""}`} />
                 </Button>
 
                 <Dropdown.Popover>
@@ -206,33 +219,31 @@ export default function Navbar() {
                 </Dropdown.Popover>
               </Dropdown>
 
-              {/* HAMBURGUESA */}
-              <button onClick={() => setOpen(!open)} className="md:hidden text-xl">
-                <i className="fi fi-rr-menu-burger"></i>
+              {/* Hamburguesa mobile */}
+              <button onClick={() => setOpen(!open)} className="md:hidden text-xl border-none bg-transparent cursor-pointer text-white">
+                <i className="fi fi-rr-menu-burger" />
               </button>
             </>
           )}
         </div>
       </nav>
 
-      {/* MOBILE MENU */}
+      {/* Mobile menu */}
       {open && user && (
         <div className="md:hidden fixed top-16 left-0 w-full bg-[#252B2B] border-t border-white/10 flex flex-col px-6 py-4 gap-4 z-40">
           {user.role === "candidato" && (
             <>
-              <NavItem text="Inicio" path="/" isActive={isActive} navigate={navigate} />
-              <NavItem text="Oportunidades" path="/dashboard" isActive={isActive} navigate={navigate} />
-              <NavItem text="Mis proyectos" path="/candidato" isActive={isActive} navigate={navigate} />
+              <NavItem text="Inicio"        path="/"           isActive={isActive} navigate={navigate} />
+              <NavItem text="Oportunidades" path="/dashboard"  isActive={isActive} navigate={navigate} />
+              <NavItem text="Mis proyectos" path="/candidato"  isActive={isActive} navigate={navigate} />
               <NavItem text="Mi portafolio" path="/portafolio" isActive={isActive} navigate={navigate} />
             </>
           )}
-
           {user.role === "empresa" && (
             <>
-              <NavItem text="Inicio" path="/" isActive={isActive} navigate={navigate} />
+              <NavItem text="Inicio"        path="/"        isActive={isActive} navigate={navigate} />
               <NavItem text="Mis proyectos" path="/empresa" isActive={isActive} navigate={navigate} />
-              <NavItem text="Trabajos" path="/dashboard" isActive={isActive} navigate={navigate} />
-              <NavItem text="Talentos" path="/talento" isActive={isActive} navigate={navigate} />
+              <NavItem text="Talentos"      path="/talento" isActive={isActive} navigate={navigate} />
             </>
           )}
         </div>
