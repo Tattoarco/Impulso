@@ -92,10 +92,10 @@ Tipos: "fit" = es buena opción para ti, "advertencia" = considera esto antes, "
       >
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm" style={{ background: "#FAFAFA", border: "1px solid #E26000" }}>
-            <img src={Mascota} alt="Mascota" className="w-10" />
+            <img src={Mascota} alt="Mascota" className="w-14" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Recomendaciones Impulso</p>
+            <p className="text-sm font-semibold text-gray-900">Impulso te recomienda</p>
             <p className="text-xs text-gray-400">¿Es este proyecto para ti?</p>
           </div>
         </div>
