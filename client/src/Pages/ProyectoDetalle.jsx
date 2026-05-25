@@ -229,7 +229,7 @@ export default function ProyectoDetalle() {
                     <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#E26000]/10 blur-3xl pointer-events-none" />
                     <div className="relative z-10">
                       <div className="inline-flex items-center gap-1.5 bg-[#E26000]/20 text-[#E26000] text-[11px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-[#E26000]/30">
-                      <img src={Mascota} alt="Mascota" className="w-10"/> Impulsate con eta experiencia</div>
+                      <img src={Mascota} alt="Mascota" className="w-10"/> Impulsate con esta experiencia</div>
                       <h1 className="text-2xl font-bold text-white tracking-tight mb-4">{job.title}</h1>
                       <div className="flex flex-wrap gap-2">
                         {[{ icon:"fi-rr-clock", val:job.duration },{ icon:"fi-rr-tag", val:job.profile_area },{ icon:"fi-rr-building", val:job.company_name }]
