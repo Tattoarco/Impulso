@@ -1,6 +1,6 @@
 const pool = require("../../db/pool");
 
-// Enviar mensaje en una etapa
+// Enviar mensaje
 async function sendMessage(req, res) {
   const { application_id, step_id, message } = req.body;
   const senderId = req.user.id;
@@ -14,16 +14,13 @@ async function sendMessage(req, res) {
       `SELECT a.id FROM applications a
        JOIN jobs j ON j.id = a.job_id
        JOIN companies c ON c.id = j.company_id
-       WHERE a.id = $1
-         AND (a.candidate_id = $2 OR c.user_id = $2)`,
+       WHERE a.id = $1 AND (a.candidate_id = $2 OR c.user_id = $2)`,
       [application_id, senderId]
     );
-
     if (accessCheck.rows.length === 0) {
       return res.status(403).json({ error: "No tienes acceso a esta conversación." });
     }
 
-    // El mensaje lo marca como leído solo por el sender
     const result = await pool.query(
       `INSERT INTO step_messages (application_id, step_id, sender_id, message, read_by)
        VALUES ($1, $2, $3, $4, $5::jsonb)
@@ -56,27 +53,21 @@ async function getMessages(req, res) {
       `SELECT a.id FROM applications a
        JOIN jobs j ON j.id = a.job_id
        JOIN companies c ON c.id = j.company_id
-       WHERE a.id = $1
-         AND (a.candidate_id = $2 OR c.user_id = $2)`,
+       WHERE a.id = $1 AND (a.candidate_id = $2 OR c.user_id = $2)`,
       [application_id, userId]
     );
-
     if (accessCheck.rows.length === 0) {
       return res.status(403).json({ error: "No tienes acceso a esta conversación." });
     }
 
-    // Marcar como leídos los mensajes que no son del usuario actual
+    // Marcar como leídos
     await pool.query(
       `UPDATE step_messages
-       SET read_by = (
-         CASE
-           WHEN read_by @> $3::jsonb THEN read_by
-           ELSE read_by || $3::jsonb
-         END
-       )
-       WHERE application_id = $1
-         AND step_id = $2
-         AND sender_id != $4`,
+       SET read_by = CASE
+         WHEN read_by @> $3::jsonb THEN read_by
+         ELSE read_by || $3::jsonb
+       END
+       WHERE application_id = $1 AND step_id = $2 AND sender_id != $4`,
       [application_id, step_id, JSON.stringify([userId]), userId]
     );
 
@@ -96,28 +87,43 @@ async function getMessages(req, res) {
   }
 }
 
-// Contar mensajes no leídos del usuario actual
+// Contar no leídos Y devolver los mensajes con contexto para el panel
 async function getUnreadCount(req, res) {
   const userId = req.user.id;
 
   try {
     const result = await pool.query(
-      `SELECT COUNT(*) AS count
+      `SELECT
+         m.id,
+         m.message,
+         m.created_at,
+         m.application_id,
+         m.step_id,
+         u.name  AS sender_name,
+         u.role  AS sender_role,
+         js.title AS step_title,
+         j.title  AS job_title,
+         j.id     AS job_id,
+         a.id     AS application_id
        FROM step_messages m
+       JOIN users u       ON u.id  = m.sender_id
        JOIN applications a ON a.id = m.application_id
-       JOIN jobs j ON j.id = a.job_id
-       JOIN companies c ON c.id = j.company_id
+       JOIN jobs j         ON j.id = a.job_id
+       JOIN job_steps js   ON js.id = m.step_id
+       JOIN companies c    ON c.id = j.company_id
        WHERE
-         -- El usuario tiene acceso (es candidato o empresa del job)
          (a.candidate_id = $1 OR c.user_id = $1)
-         -- El mensaje no lo envió el usuario
          AND m.sender_id != $1
-         -- El usuario no lo ha leído aún
-         AND NOT (m.read_by @> $2::jsonb)`,
+         AND NOT (m.read_by @> $2::jsonb)
+       ORDER BY m.created_at DESC
+       LIMIT 20`,
       [userId, JSON.stringify([userId])]
     );
 
-    res.json({ count: parseInt(result.rows[0].count) || 0 });
+    res.json({
+      count:    result.rows.length,
+      messages: result.rows,
+    });
   } catch (err) {
     console.error("Error en getUnreadCount:", err.message);
     res.status(500).json({ error: "Error al obtener notificaciones." });
