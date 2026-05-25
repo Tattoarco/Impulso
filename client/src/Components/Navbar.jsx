@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Context/Authcontext";
 import { Button, Dropdown, Label } from "@heroui/react";
 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
 import logo from "../../Public/Logo.jpeg";
 
 const NavItem = ({ text, path, isActive, navigate }) => {
@@ -33,6 +36,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   const isActive = (path) => location.pathname === path;
+
+  const MySwal = withReactContent(Swal);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,8 +106,17 @@ export default function Navbar() {
                 Iniciar sesión
               </button>
 
-              <button onClick={() => navigate("/registro")} className="bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 cursor-pointer border-none">
-                Registrarse
+              <button
+                className="bg-orange-500 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 cursor-pointer border-none"
+                onClick={() =>
+                  MySwal.fire({
+                    title: "¡Próximamente registro!",
+                    text: "Estamos interesados en mostarte Impulso completamente, en este momento nos encontramos en mejoras del registro para ofecerte una mejor experiencia. ¡Gracias por tu comprensión!",
+                    icon: "warning",
+                  })
+                }
+              >
+                Registrate
               </button>
             </>
           ) : (

@@ -141,7 +141,7 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onFeedbackFinal,
             </>
           )}
 
-          {applicant.status === "approved" && (
+          {/* {applicant.status === "approved" && (
             <button
               onClick={toggleTimeline}
               className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:-translate-y-0.5
@@ -151,7 +151,7 @@ function ApplicantCard({ applicant, index, onApprove, onReject, onFeedbackFinal,
               <i className={`fi ${showTimeline ? "fi-rr-angle-up" : "fi-rr-list-timeline"} text-[11px]`} />
               {showTimeline ? "Ocultar timeline" : "Ver timeline"}
             </button>
-          )}
+          )} */}
 
           {allDone && (
             <button onClick={() => onFeedbackFinal(applicant.id, applicant.candidate_name)} className="flex items-center gap-1.5 px-4 py-2 bg-[#6651DD] text-white text-xs font-semibold rounded-xl border-none cursor-pointer transition-all hover:bg-[#5542c4] hover:-translate-y-0.5">
